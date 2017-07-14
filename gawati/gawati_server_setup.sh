@@ -82,7 +82,7 @@ function install_jetty {
 
       [ -f "${FILE}" ] && sed -i "s%^.*${PROPERTY}=.*$%${PROPERTY}=${VALUE}%" "${FILE}" || echo "Failed to set >${PROPERTY}< to >${VALUE}< in >${FILE}<"
     }
-  
+
     echo 'JAVA_HOME="`readlink -f /usr/bin/java | sed "s:/bin/java::"`"' >~/.javarc
     echo 'export JAVA_HOME' >>~/.javarc
     grep '\.javarc' ~/.bash_profile >/dev/null || { echo >>~/.bash_profile ; echo '[ -f ~/.javarc ] && . ~/.javarc' >>~/.bash_profile ; }
@@ -106,6 +106,7 @@ function install_jetty {
     set_jettyini_property "jetty.http.host" "127.0.0.1" "http"
     set_jettyini_property "jetty.http.port" "${JETTY_PORT}" "http"
     set_jettyini_property "jetty.httpConfig.securePort" "${JETTY_SPORT}" "server"
+    set_jettyini_property "jetty.console-capture.dir" "${JETTY_BASE}/logs" "console-capture"
     exit;
 EndOfScriptAsJETTY_USER
   export JETTY_USERHOME="/home/${JETTY_USER}"
@@ -148,9 +149,9 @@ function install_exist {
     function set_jettyxml_property {
       PROPERTY="${1}"
       VALUE="${2}"
-  
+
       xmlstarlet -q sel -t -v '/Configure[@id="Server"]/Call[@class="java.lang.System"][@name="setProperty"]/Arg[1]' jetty.xml | grep "^${PROPERTY}$" >/dev/null 2>&1 && {
-        xmlstarlet -q ed -P -L -u "/Configure[@id=\"Server\"]/Call[@class=\"java.lang.System\"][@name=\"setProperty\"][Arg=\"${PROPERTY}\"]/Arg[2]" -v "${VALUE}" jetty.xml >/dev/null 
+        xmlstarlet -q ed -P -L -u "/Configure[@id=\"Server\"]/Call[@class=\"java.lang.System\"][@name=\"setProperty\"][Arg=\"${PROPERTY}\"]/Arg[2]" -v "${VALUE}" jetty.xml >/dev/null
         echo "jetty sytem property >${PROPERTY}< was configured as >${VALUE}<"
         } || {
         echo "Adding sytem property >${PROPERTY}< as >${VALUE}<"
@@ -220,4 +221,3 @@ yes | tools/yajsw/bin/installDaemon.sh >/dev/null
   chkconfig --add eXist-db
   chkconfig eXist-db on
   }
-
