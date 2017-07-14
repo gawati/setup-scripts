@@ -48,7 +48,7 @@ TESTVARIABLES
 
 # Install components from OS packages
 
-yum -q -y install java-1.8.0-openjdk httpd wget xmlstarlet
+yum -q -y install java-1.8.0-openjdk httpd wget xmlstarlet git
 echo 'JAVA_HOME="`readlink -f /usr/bin/java | sed "s:/bin/java::"`"' >~/.javarc
 echo 'export JAVA_HOME' >>~/.javarc
 grep '\.javarc' ~/.bash_profile >/dev/null || { echo >>~/.bash_profile ; echo '[ -f ~/.javarc ] && . ~/.javarc' >>~/.bash_profile ; }
