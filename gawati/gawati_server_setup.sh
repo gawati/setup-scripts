@@ -1,79 +1,197 @@
 #!/bin/bash
+trap "exit 1" TERM
 
 [ '0' -eq "`id -ur`" ] || {
   echo 'This installer must be run as root.'
   exit 1
   }
 
-COLOR_STD='\033[0m'
-COLOR_NOTE='\033[0;32m'
+COLOR_OFF='\033[0m'
+COLOR_0='\033[0m'
+COLOR_1='\033[0;32m'
+COLOR_2='\033[0;33m'
+COLOR_3='\033[0;31m'
+COLOR_4='\033[0;96m'
 
-# Read installation configuration from ~/gawati_server_setup.cfg
-# If ~/gawati_server_setup.cfg does not exist, create a default one and exit
+DEBUG=1
 
-[ -f ~/gawati_server_setup.cfg ] || {
-echo "~/gawati_server_setup.cfg missing, creating default."
-cat << EOF >~/gawati_server_setup.cfg
-export JETTY_USER="dev01"
-export JETTY_PROJECT="jetty-apps"
-export JETTY_PORT="9084"
-export JETTY_SPORT="9444"
-export EXIST_BACKEND_USER="xstbe"
-export EXIST_BACKEND_PORT="10084"
-export EXIST_BACKEND_SPORT="10444"
-export EXIST_STAGING_USER="xstst"
-export EXIST_STAGING_PORT="10083"
-export EXIST_STAGING_SPORT="10443"
-EOF
-echo "Please verify installation parameters in ~/gawati_server_setup.cfg"
-echo "Then rerun ${0} to install."
-exit
-}
+function message {
+  [ "$#" -gt 2 ] && {
+    [ "${3}" -ge "${DEBUG}" ] && return 0
+    }
+  COLOR_ON="`eval echo \$\{COLOR_${1}\}`"
+  echo -e "${COLOR_ON}${2}${COLOR_OFF}"
+  }
 
-. ~/gawati_server_setup.cfg
+function bail_out {
+  message 3 "${2}"
+  kill -s TERM ${MYPID}
+  }
 
-: <<TESTVARIABLES || exit 1
-${JETTY_USER?}
-${JETTY_PROJECT?}
-${JETTY_PORT?}
-${JETTY_SPORT?}
-${EXIST_BACKEND_USER?}
-${EXIST_BACKEND_PORT?}
-${EXIST_BACKEND_SPORT?}
-${EXIST_STAGING_USER?}
-${EXIST_STAGING_PORT?}
-${EXIST_STAGING_SPORT?}
-TESTVARIABLES
+function vardebug {
+  for VARIABLE in $* ; do
+    message 4 "${VARIABLE}: >${!VARIABLE}<" 2
+    done
+  }
+
+function ensureFolder {
+  [ -d "${1}" ] && return 0
+  [ -e "${1}" ] && bail_out 1 "Destination >${1}< in use, but not a folder."
+  mkdir -p "${1}"
+  }
+
+function iniget {
+  crudini --get "${INIFILE}" "${1}" "${2}" || bail_out 1 "Parameter >${2}< not defined for >${1}< in >${INIFILE}<."
+  }
+
+function download {
+  message 1 "Starting download of >${1}<. This may take a moment."
+  wget -nv -c "${2}" -O "${1}" || {
+    rm "${1}"
+    return 1
+    }
+  }
+
+function install {
+  rpm -q "${1}" >/dev/null 2>&1 && {
+    message 1 ">${1}< already installed."
+    return 0
+    }
+  message 4 "Installing >${1}<..." 1
+  yum -q -y install "${1}" || bail_out 1 "Failed to install package >${1}<."
+  message 1 "Installed package >${1}<."
+  }
+
+MYPID=$$
+TARGET="${1:-dev}"
+INIFILE="${HOME}/${TARGET}.ini"
+vardebug INIFILE
+
+[ -f "${INIFILE}" ] || {
+  download "${INIFILE}" "https://github.com/gawati/setup-scripts/raw/master/gawati/ini/${TARGET}.ini" || message 2 "Failed to download an installation template for >${TARGET}< at Gawati."
+  message 1 "Please verify installation parameters in >${INIFILE}<."
+  message 1 "Then rerun ${0} to install."
+  exit 0
+  }
+
+[ -f "${INIFILE}" ] || bail_out 1 "No installation template file at >${INIFILE}<."
+message 1 "Reading installation instructions from >${INIFILE}<."
+
+TEMP="`crudini --get \"${INIFILE}\" options debug 2>/dev/null`" && DEBUG="${TEMP}"
+PACKAGES="`crudini --get \"${INIFILE}\" options installPackages`"
+vardebug DEBUG PACKAGES
+
+for PACKAGE in `echo ${PACKAGES}` ; do
+  install "${PACKAGE}"
+  done
 
 
-# Install components from OS packages
+DOWNLOADFOLDER="`iniget options downloadFolder`"
+DEPLOYMENTFOLDER="`iniget options deploymentFolder`"
+ensureFolder "${DOWNLOADFOLDER}"
+ensureFolder "${DEPLOYMENTFOLDER}"
 
-yum -q -y install java-1.8.0-openjdk httpd wget xmlstarlet git
-echo 'JAVA_HOME="`readlink -f /usr/bin/java | sed "s:/bin/java::"`"' >~/.javarc
-echo 'export JAVA_HOME' >>~/.javarc
-grep '\.javarc' ~/.bash_profile >/dev/null || { echo >>~/.bash_profile ; echo '[ -f ~/.javarc ] && . ~/.javarc' >>~/.bash_profile ; }
-. ~/.javarc
+TASKS="`crudini --get \"${INIFILE}\" | grep -v options`"
+declare -A RESOURCES
+declare -A INSTALLS
+
+for TASK in ${TASKS} ; do
+  vardebug TASK
+  TYPE="`iniget "${TASK}" type`"
+  vardebug TYPE
+  [ "${TYPE}" = "resource" ] && RESOURCES+=(["${TASK}"]="`iniget \"${TASK}\" download`")
+  [ "${TYPE}" = "install" ] && INSTALLS+=(["${TASK}"]="`iniget \"${TASK}\" resources`")
+  done
+
+pushd "${DOWNLOADFOLDER}" >/dev/null || bail_out 1 "Failed to enter folder >${DOWNLOADFOLDER}<."
+
+for RESOURCE in ${!RESOURCES[@]} ; do
+  vardebug RESOURCE
+  OUTFILE="`echo ${RESOURCES[$RESOURCE]} | cut -d ' ' -f 1`"
+  URL="`echo ${RESOURCES[$RESOURCE]} | cut -d ' ' -f 2-`"
+  vardebug OUTFILE URL
+  [ -f "${OUTFILE}" ] || {
+    download "${OUTFILE}" "${URL}" || bail_out 2 "Failed to download >${OUTFILE}< for resource >${RESOURCE}< from >${URL}<."
+    }
+  done
+
+popd >/dev/null
 
 
-# Fetch resources
-[ -d /opt/Download ] || mkdir /opt/Download
-cd /opt/Download
-echo "Downloading resources. This may take a moment."
-[ -f "jetty-distribution-9.4.6.v20170531.tar.gz" ] || wget -nv -c "http://central.maven.org/maven2/org/eclipse/jetty/jetty-distribution/9.4.6.v20170531/jetty-distribution-9.4.6.v20170531.tar.gz"
-[ -f "eXist-db-setup-3.3.0.jar" ] || wget -nv -c "https://bintray.com/existdb/releases/download_file?file_path=eXist-db-setup-3.3.0.jar" -O "eXist-db-setup-3.3.0.jar"
+# Installer section
 
 
+function set_environment_java {
+  echo 'JAVA_HOME="`readlink -f /usr/bin/java | sed "s:/bin/java::"`"' >~/.javarc
+  echo 'export JAVA_HOME' >>~/.javarc
+  grep '\.javarc' ~/.bash_profile >/dev/null || { echo >>~/.bash_profile ; echo '[ -f ~/.javarc ] && . ~/.javarc' >>~/.bash_profile ; }
+  . ~/.javarc
+  }
 
-# Install jetty
+function iniget_installer {
+  INSTANCE="${1}"
+  RESOURCE="${INSTALLS[$INSTANCE]}"
+  #vardebug INSTANCE RESOURCE
+  OUTFILE="`echo ${RESOURCES[$RESOURCE]} | cut -d ' ' -f 1`"
+  INSTALLSRC="${DOWNLOADFOLDER}/${OUTFILE}"
+  #vardebug OUTFILE INSTALLSRC
+
+  RUNAS_USER="`iniget \"${INSTANCE}\" user`"
+  #vardebug RUNAS_USER
+  INSTANCE_FOLDER="`iniget \"${INSTANCE}\" instanceFolder`"
+  #vardebug INSTANCE_FOLDER
+  INSTANCE_PATH="`echo eval echo ${INSTANCE_FOLDER} | sudo -u \"${RUNAS_USER}\" bash -s`" || bail_out 1 "Failed to determine instance folder for >${INSTANCE}<."
+  #vardebug INSTANCE_PATH
+  OPTIONS="`crudini --get \"${INIFILE}\" \"${INSTANCE}\" options`"
+  #vardebug OPTIONS
+  }
+
+function deploy_jetty {
+  UNPACKFOLDER="${1}"
+  DOWNLOADFILE="${2}"
+  vardebug UNPACKFOLDER DOWNLOADFOLDER
+  pushd "${DEPLOYMENTFOLDER}" >/dev/null ||  bail_out 1 "Failed to enter folder >${1}<."
+  [ -e "${UNPACKFOLDER}" ] && {
+    message 1 "Deployment destination folder >${UNPACKFOLDER}< already exists. Skipping."
+    return
+    }
+  tar -xzf "${DOWNLOADFILE}" || bail_out 1 "Error while extracting >${DOWNLOADFILE}<."
+  popd >/dev/null
+  }
+
 
 function install_jetty {
-  export JETTY_USER="${1}"
-  echo -e "${COLOR_NOTE}Installing jetty-base as user ${JETTY_USER}.${COLOR_STD}"
-  grep "^${JETTY_USER}:.*" /etc/passwd >/dev/null || useradd "${JETTY_USER}"
-  sudo -u "${JETTY_USER}" bash -s "${2}" "${3}" "${4}" <<'EndOfScriptAsJETTY_USER'
-    export JETTY_BASE="${HOME}/apps/${1}"
-    export JETTY_PORT="${2}"
-    export JETTY_SPORT="${3}"
+  iniget_installer "${1}"
+  EXIST_HOME="${INSTANCE_PATH}"
+  vardebug INSTANCE RESOURCE OUTFILE INSTALLSRC RUNAS_USER INSTANCE_FOLDER EXIST_HOME OPTIONS
+
+  UNPACKFOLDER="${DEPLOYMENTFOLDER}/`iniget \"${RESOURCE}\" unpackfolder`"
+  deploy_jetty "${UNPACKFOLDER}" "${INSTALLSRC}"
+
+  JETTY_BASE="`echo eval echo ${INSTANCE_FOLDER} | sudo -u \"${RUNAS_USER}\" bash -s`" || bail_out 1 "Failed to determine instance folder for >${INSTANCE}<."
+  vardebug JETTY_BASE
+  JETTY_PORT="`iniget \"${INSTANCE}\" port`"
+  vardebug JETTY_PORT
+  JETTY_SPORT="`iniget \"${INSTANCE}\" sslport`"
+  vardebug JETTY_SPORT
+  JETTY_MODULES="`iniget \"${INSTANCE}\" modules`"
+  vardebug JETTY_MODULES
+
+  [ -e "${JETTY_BASE}" ] && {
+    message 1 "Destination >${EXIST_HOME}< for >${INSTANCE}< already existing. Skipping."
+    return
+    }
+
+  message 1 "Installing to jetty-base folder >${INSTANCE_FOLDER}< as user >${RUNAS_USER}<."
+  grep "^${RUNAS_USER}:.*" /etc/passwd >/dev/null || useradd "${RUNAS_USER}"
+
+  sudo -u "${RUNAS_USER}" bash -s "${INSTANCE}" "${JETTY_BASE}" "${UNPACKFOLDER}" "${JETTY_PORT}" "${JETTY_SPORT}" "${JETTY_MODULES}" <<'EndOfScriptAsRUNAS_USER'
+    export INSTANCE="${1}"
+    export JETTY_BASE="${2}"
+    export UNPACKFOLDER="${3}"
+    export JETTY_PORT="${4}"
+    export JETTY_SPORT="${5}"
+    export JETTY_MODULES="${6}"
 
     function set_jettyini_property {
       PROPERTY="${1}"
@@ -100,51 +218,73 @@ function install_jetty {
     [ -e "${JETTY_BASE}/tmp" ] || mkdir -p "${JETTY_BASE}/tmp"
 
     cd "${JETTY_BASE}" || exit 1
-    [ -e "jettyserver" ] || ln -s /opt/jetty-distribution-9.4.6.v20170531 jettyserver
+    [ -e "jettyserver" ] || ln -s "${UNPACKFOLDER}" jettyserver
     java -jar "${JETTY_HOME}/start.jar" --create-startd
-    java -jar "${JETTY_HOME}/start.jar" --add-to-start=server,http,console-capture,deploy,ext,jsp,resources,jstl,websocket,webapp,home-base-warning
+    java -jar "${JETTY_HOME}/start.jar" --add-to-start="${JETTY_MODULES}"
     set_jettyini_property "jetty.http.host" "127.0.0.1" "http"
     set_jettyini_property "jetty.http.port" "${JETTY_PORT}" "http"
     set_jettyini_property "jetty.httpConfig.securePort" "${JETTY_SPORT}" "server"
     set_jettyini_property "jetty.console-capture.dir" "${JETTY_BASE}/logs" "console-capture"
-    exit;
-EndOfScriptAsJETTY_USER
-  export JETTY_USERHOME="/home/${JETTY_USER}"
-}
+EndOfScriptAsRUNAS_USER
 
-cd /opt
-tar -xzf /opt/Download/jetty-distribution-9.4.6.v20170531.tar.gz
+  echo "${OPTIONS}" | grep -i daemon >/dev/null && {
+    JETTY_HOME="${JETTY_BASE}/jettyserver"
+    JETTY_DEFCONFIG="/etc/default/${INSTANCE}"
+    JETTY_INIT="/etc/init.d/${INSTANCE}"
+    vardebug JETTY_BASE JETTY_HOME JETTY_DEFCONFIG JETTY_INIT
 
-install_jetty "${JETTY_USER}" "${JETTY_PROJECT}" "${JETTY_PORT}" "${JETTY_SPORT}"
+    message 1 "Installing jetty instance in >${JETTY_BASE}< as daemon named >${INSTANCE}< running as user >${RUNAS_USER}<."
 
-export JETTY_BASE="${JETTY_USERHOME}/apps/${JETTY_PROJECT}"
-export JETTY_HOME="${JETTY_BASE}/jettyserver"
+    echo "JETTY_USER='${RUNAS_USER}'" >"${JETTY_DEFCONFIG}"
+    echo "JETTY_HOME='${JETTY_HOME}'" >>"${JETTY_DEFCONFIG}"
+    echo "JETTY_BASE='${JETTY_BASE}'" >>"${JETTY_DEFCONFIG}"
+    echo "JETTY_RUN='${JETTY_BASE}/run'" >>"${JETTY_DEFCONFIG}"
+    echo "TMPDIR='${JETTY_BASE}/tmp'" >>"${JETTY_DEFCONFIG}"
+    chcon -u system_u "${JETTY_DEFCONFIG}"
 
-echo "JETTY_USER='${JETTY_USER}'" >/etc/default/jetty
-echo "JETTY_HOME='${JETTY_HOME}'" >>/etc/default/jetty
-echo "JETTY_BASE='${JETTY_BASE}'" >>/etc/default/jetty
-echo "JETTY_RUN='${JETTY_BASE}/run'" >>/etc/default/jetty
-echo "TMPDIR='${JETTY_BASE}/tmp'" >>/etc/default/jetty
+    cat "${JETTY_HOME}/bin/jetty.sh" >"${JETTY_INIT}"
+    chmod 755 "${JETTY_INIT}"
+    chcon -u system_u -t initrc_exec_t "${JETTY_INIT}"
 
-echo -e "${COLOR_NOTE}Installing jetty instance in ${JETTY_BASE} as service running as user ${JETTY_USER}.${COLOR_STD}"
+    chkconfig --add "${INSTANCE}"
+    chkconfig "${INSTANCE}" on
+    }
+  }
 
 
-chcon -u system_u /etc/default/jetty
-cat "${JETTY_HOME}/bin/jetty.sh" >/etc/init.d/jetty
-chcon -u system_u -t initrc_exec_t /etc/init.d/jetty
-chkconfig --add jetty
-chkconfig jetty on
 
 
 # Install eXistdb
 
-function install_exist {
-  export EXIST_USER="${1}"
-  echo -e "${COLOR_NOTE}Installing eXistdb as user ${EXIST_USER}.${COLOR_STD}"
-  grep "^${EXIST_USER}:.*" /etc/passwd >/dev/null || useradd "${EXIST_USER}"
-  sudo -u "${EXIST_USER}" bash -s "${2}" "${3}" <<'EndOfScriptAsEXIST_USER'
-    export EXIST_PORT="${1}"
-    export EXIST_SPORT="${2}"
+function install_existdb {
+  iniget_installer "${1}"
+  EXIST_HOME="${INSTANCE_PATH}"
+  vardebug INSTANCE RESOURCE OUTFILE INSTALLSRC RUNAS_USER INSTANCE_FOLDER EXIST_HOME OPTIONS
+
+  EXIST_DATA="`iniget \"${INSTANCE}\" dataFolder`"
+  EXIST_DATA="`echo eval echo ${EXIST_DATA} | sudo -u \"${RUNAS_USER}\" bash -s`" || bail_out 1 "Failed to determine data folder for >${INSTANCE}<."
+  vardebug EXIST_DATA
+
+  EXIST_PORT="`iniget \"${INSTANCE}\" port`"
+  vardebug EXIST_PORT
+  EXIST_SPORT="`iniget \"${INSTANCE}\" sslport`"
+  vardebug EXIST_SPORT
+
+  [ -e "${EXIST_HOME}" ] && {
+    echo -e "\033[0;32mDestination >${EXIST_HOME}< for >${INSTANCE}< already existing. Skipping.<\033[0m"
+    return
+    }
+
+  message 1 "Installing to folder >${INSTANCE_FOLDER}< as user >${RUNAS_USER}<."
+
+  grep "^${RUNAS_USER}:.*" /etc/passwd >/dev/null || useradd "${RUNAS_USER}"
+  sudo -u "${RUNAS_USER}" bash -s "${INSTANCE}" "${EXIST_HOME}" "${INSTALLSRC}" "${EXIST_PORT}" "${EXIST_SPORT}" "${EXIST_DATA}" <<'EndOfScriptAsRUNAS_USER'
+    export INSTANCE="${1}"
+    export EXIST_HOME="${2}"
+    export INSTALLSRC="${3}"
+    export EXIST_PORT="${4}"
+    export EXIST_SPORT="${5}"
+    export EXIST_DATA="${6}"
 
     function set_jettyxml_property {
       PROPERTY="${1}"
@@ -165,12 +305,20 @@ function install_exist {
         }
       }
 
+    function set_yajsm_property {
+      PROPERTY="${1}"
+      VALUE="${2}"
+      FILE="${EXIST_HOME}/tools/yajsw/conf/${3}.conf"
+
+      [ -f "${FILE}" ] && sed -i "s%^.*${PROPERTY} *=.*$%${PROPERTY}=${VALUE}%" "${FILE}" || echo "Failed to set >${PROPERTY}< to >${VALUE}< in >${FILE}<"
+      }
+
     echo 'JAVA_HOME="`readlink -f /usr/bin/java | sed "s:/bin/java::"`"' >~/.javarc
     echo 'export JAVA_HOME' >>~/.javarc
     grep '\.javarc' ~/.bash_profile >/dev/null || { echo >>~/.bash_profile ; echo '[ -f ~/.javarc ] && . ~/.javarc' >>~/.bash_profile ; }
     . ~/.javarc
 
-    echo "EXIST_HOME='${HOME}/apps/existdb'" >~/.existrc
+    echo "EXIST_HOME='${EXIST_HOME}'" >~/.existrc
     echo 'export EXIST_HOME' >>~/.existrc
     grep '\.existrc' ~/.bash_profile >/dev/null || { echo >>~/.bash_profile ; echo '[ -f ~/.existrc ] && . ~/.existrc' >>~/.bash_profile ; }
     . ~/.existrc
@@ -184,40 +332,52 @@ function install_exist {
     cd "${EXIST_HOME}" || exit 1
     touch bin/setup.sh
     chmod 600 bin/setup.sh
-    echo "INSTALL_PATH=${HOME}/apps/existdb" > existdb.options
-    echo "dataDir=${HOME}/apps/existdata" >> existdb.options
+    echo "INSTALL_PATH=${EXIST_HOME}" > existdb.options
+    echo "dataDir=${EXIST_DATA}" >> existdb.options
     echo "MAX_MEMORY=2048" >> existdb.options
     echo "cacheSize=256" >> existdb.options
     export adminPasswd="`< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c10`"
-    java -jar /opt/Download/eXist-db-setup-3.3.0.jar -options existdb.options
+    java -jar "${INSTALLSRC}" -options existdb.options
     sed -i "s%^.*wrapper.app.account=.*$%wrapper.app.account=${USER}%" "${EXIST_HOME}/tools/yajsw/conf/wrapper.conf"
     bin/client.sh --no-gui --local --user admin --xpath "xmldb:change-user('admin','${adminPasswd}','dba','/db')" >/dev/null
-    echo -e "\033[0;32mYour eXistDB instance ${USER} has admin password: >${adminPasswd}<\033[0m"
+    echo -e "\033[0;32mYour eXistDB instance >${INSTANCE}< has admin password: >${adminPasswd}<\033[0m"
     #read -n 1 -s -r -p 'Take note of this password for user "admin". Press any key to continue.'
+    set_yajsm_property wrapper.ntservice.name "${INSTANCE}" wrapper
     cd "${JETTY_HOME}/etc"
     set_jettyxml_property jetty.port "${EXIST_PORT}"
     set_jettyxml_property jetty.ssl.port "${EXIST_SPORT}"
     exit;
-EndOfScriptAsEXIST_USER
-  export EXIST_USERHOME="/home/${EXIST_USER}"
-  export EXIST_HOME="${EXIST_USERHOME}/apps/existdb"
-}
+EndOfScriptAsRUNAS_USER
 
-install_exist "${EXIST_STAGING_USER}" "${EXIST_STAGING_PORT}" "${EXIST_STAGING_SPORT}"
-install_exist "${EXIST_BACKEND_USER}" "${EXIST_BACKEND_PORT}" "${EXIST_BACKEND_SPORT}"
+  echo "${OPTIONS}" | grep -i daemon >/dev/null && {
+    message 1 "Installing eXistdb instance in >${EXIST_HOME}< as daemon named >${INSTANCE}< running as user >${RUNAS_USER}<."
 
-echo -e "${COLOR_NOTE}Installing eXistdb instance in ${EXIST_HOME} as service running as user ${EXIST_USER}.${COLOR_STD}"
+    export RUN_AS_USER="${RUNAS_USER}"
+    cd "${EXIST_HOME}"
+    echo N | tools/yajsw/bin/installDaemon.sh >/dev/null
 
-export RUN_AS_USER="${EXIST_USER}"
-cd "${EXIST_HOME}"
-yes | tools/yajsw/bin/installDaemon.sh >/dev/null
-
-[ -f /etc/systemd/system/eXist-db.service ] && {
-  chcon -u system_u /etc/systemd/system/eXist-db.service
-  systemctl enable eXist-db
+    [ -f "/etc/init.d/${INSTANCE}" ] && {
+      chcon -u system_u "/etc/init.d/${INSTANCE}"
+      chkconfig --add "${INSTANCE}"
+      chkconfig "${INSTANCE}" on
+      }
+    }
   }
-[ -f /etc/init.d/eXist-db ] && {
-  chcon -u system_u /etc/init.d/eXist-db
-  chkconfig --add eXist-db
-  chkconfig eXist-db on
-  }
+
+
+
+
+set_environment_java
+
+for INSTANCE in ${!INSTALLS[@]} ; do
+  [ "${INSTANCE}" = "" ] && bail_out 1 "Installer instance name empty."
+  vardebug INSTANCE
+  RESOURCE="${INSTALLS[$INSTANCE]}"
+  vardebug RESOURCE
+  INSTALLER="install_${RESOURCE}"
+  vardebug INSTALLER
+  [ "`type -t ${INSTALLER}`" != function ] && bail_out 1 "No installer available for resource type >${RESOURCE}<."
+  message 4 "Calling installer >${INSTALLER}<." 2
+  "${INSTALLER}" "${INSTANCE}"
+  done
+
