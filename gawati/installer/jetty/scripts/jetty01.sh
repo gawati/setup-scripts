@@ -15,11 +15,13 @@ function deploy_jetty {
 
 
 function install {
-  iniget_installer "${1}"
+  VERSION="${2}"
+  iniget_installer "${1}" "jetty-distribution-${VERSION}.tar.gz" "http://central.maven.org/maven2/org/eclipse/jetty/jetty-distribution/${VERSION}/jetty-distribution-${VERSION}.tar.gz"
+  vardebug INSTANCE OUTFILE INSTALLSRC RUNAS_USER INSTANCE_FOLDER VERSION OPTIONS
   EXIST_HOME="${INSTANCE_PATH}"
-  vardebug INSTANCE RESOURCE OUTFILE INSTALLSRC RUNAS_USER INSTANCE_FOLDER EXIST_HOME OPTIONS
+  vardebug EXIST_HOME
 
-  UNPACKFOLDER="${DEPLOYMENTFOLDER}/`iniget \"${RESOURCE}\" unpackfolder`"
+  UNPACKFOLDER="${DEPLOYMENTFOLDER}/jetty-distribution-${VERSION}"
   deploy_jetty "${UNPACKFOLDER}" "${INSTALLSRC}"
 
   JETTY_BASE="`echo eval echo ${INSTANCE_FOLDER} | sudo -u \"${RUNAS_USER}\" bash -s`" || bail_out 1 "Failed to determine instance folder for >${INSTANCE}<."
