@@ -1,9 +1,12 @@
 #!/bin/bash
 
 function install {
-  iniget_installer "${1}"
+  VERSION="${2}"
+  iniget_installer "${1}" "eXist-db-setup-${VERSION}.jar" "https://bintray.com/existdb/releases/download_file?file_path=eXist-db-setup-${VERSION}.jar"
+  vardebug INSTANCE OUTFILE INSTALLSRC RUNAS_USER INSTANCE_FOLDER VERSION OPTIONS
+
   EXIST_HOME="${INSTANCE_PATH}"
-  vardebug INSTANCE RESOURCE OUTFILE INSTALLSRC RUNAS_USER INSTANCE_FOLDER EXIST_HOME OPTIONS
+  vardebug EXIST_HOME
 
   EXIST_DATA="`iniget \"${INSTANCE}\" dataFolder`"
   EXIST_DATA="`echo eval echo ${EXIST_DATA} | sudo -u \"${RUNAS_USER}\" bash -s`" || bail_out 1 "Failed to determine data folder for >${INSTANCE}<."
@@ -18,6 +21,8 @@ function install {
     echo -e "\033[0;32mDestination >${EXIST_HOME}< for >${INSTANCE}< already existing. Skipping.<\033[0m"
     return
     }
+
+  OSinstall xmlstarlet 1
 
   message 1 "Installing to folder >${INSTANCE_FOLDER}< as user >${RUNAS_USER}<."
 
