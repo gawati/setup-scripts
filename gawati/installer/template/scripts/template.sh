@@ -1,8 +1,9 @@
-#!/bin/bash
-
 function install {
   VERSION="${2}"
   installer_init "${1}" "examplefile.png" "http://africaninnovation.org/img/logo.png"
+
+  # Make silently sure, that bash is installed
+  OSinstall bash 1
 
   message 1 "This is a demo / template for writing installers, listing available predefined variables. It will not make any changes."
   message 1 "This template was invoked with instance name >${INSTANCE}<. This name might be used as a service name for starting at boot time."

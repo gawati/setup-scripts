@@ -15,6 +15,10 @@ COLOR_4='\033[0;96m'
 
 DEBUG=1
 
+function timestamp {
+  date +"%Y%m%d_%H%M%S"
+  }
+
 function message {
   [ "$#" -gt 2 ] && {
     [ "${3}" -ge "${DEBUG}" ] && return 0
@@ -66,7 +70,7 @@ function download {
 function OSinstall {
   PACKAGE="${1}"
   QUIESCE="${2:-0}"
-  vardebug QUIESCE
+  vardebug PACKAGE QUIESCE
   rpm -q "${PACKAGE}" >/dev/null 2>&1 && {
     [ "${QUIESCE}" -lt "1" ] && message 1 ">${PACKAGE}< already installed."
     return 0
@@ -77,6 +81,7 @@ function OSinstall {
   }
 
 MYPID=$$
+STAMP="`timestamp`"
 TARGET="${1:-dev}"
 
 OSinstall wget 1
@@ -97,7 +102,8 @@ vardebug INIFILE
 message 1 "Reading installation instructions from >${INIFILE}<."
 
 TEMP="`crudini --get \"${INIFILE}\" options debug 2>/dev/null`" && DEBUG="${TEMP}"
-PACKAGES="`crudini --get \"${INIFILE}\" options installPackages`"
+#PACKAGES="`crudini --get \"${INIFILE}\" options installPackages`"
+PACKAGES="`iniget options installPackages`"
 vardebug DEBUG PACKAGES
 
 for PACKAGE in `echo ${PACKAGES}` ; do
@@ -164,38 +170,9 @@ popd >/dev/null
 
 # Installer section
 
-
-function set_environment_java {
-  echo 'JAVA_HOME="`readlink -f /usr/bin/java | sed "s:/bin/java::"`"' >~/.javarc
-  echo 'export JAVA_HOME' >>~/.javarc
-  grep '\.javarc' ~/.bash_profile >/dev/null || { echo >>~/.bash_profile ; echo '[ -f ~/.javarc ] && . ~/.javarc' >>~/.bash_profile ; }
-  . ~/.javarc
-  }
-
-function installer_init {
-  declare -g INSTANCE="${1}"
-  declare -g OUTFILE="${2}"
-  declare -g SRCURL="${3}"
-  declare -g INSTALLER_NAME="${INSTALLS[$INSTANCE]}"
-  declare -g INSTALLSRC="${DOWNLOADFOLDER}/${OUTFILE}"
-  vardebug INSTANCE OUTFILE SRCURL INSTALLER_NAME INSTALLSRC
-
-  declare -g RUNAS_USER="`iniget \"${INSTANCE}\" user`"
-  vardebug RUNAS_USER
-  grep "^${RUNAS_USER}:.*" /etc/passwd >/dev/null || useradd "${RUNAS_USER}" || bail_out 1 "Failed to add missing user >${RUNAS_USER}<."
-
-  declare -g INSTANCE_FOLDER="`iniget \"${INSTANCE}\" instanceFolder`"
-  vardebug INSTANCE_FOLDER
-  declare -g INSTANCE_PATH="`echo eval echo ${INSTANCE_FOLDER} | sudo -u \"${RUNAS_USER}\" bash -s`" || bail_out 1 "Failed to determine instance folder for >${INSTANCE}<."
-  vardebug INSTANCE_PATH
-  declare -g OPTIONS="`crudini --get \"${INIFILE}\" \"${INSTANCE}\" options`"
-  vardebug OPTIONS
-
-  [ "${OUTFILE}" = "" ] || [ -f "${INSTALLSRC}" ] || {
-    download "${INSTALLSRC}" "${SRCURL}" || bail_out 2 "Failed to download >${OUTFILE}< from >${URL}<."
-    declare -g OUTFILE=""
-    }
-  }
+LIBRARY="${DOWNLOADFOLDER}/installer/include.sh"
+[ -f "${LIBRARY}" ] || bail_out 2 "Installer library missing in repository at >${LIBRARY}<."
+source "${LIBRARY}"
 
 set_environment_java
 
@@ -205,7 +182,8 @@ for INSTANCE in ${!INSTALLS[@]} ; do
   unset install
   INSTALLER_NAME="${INSTALLS[$INSTANCE]}"
   vardebug INSTALLER_NAME
-  VERSION="`crudini --get \"${INIFILE}\" \"${INSTANCE}\" version`"
+  #VERSION="`crudini --get \"${INIFILE}\" \"${INSTANCE}\" version`"
+  VERSION="`iniget \"${INSTANCE}\" version`"
   vardebug VERSION
   INSTALLER_FILE="${DOWNLOADFOLDER}/installer/${INSTALLER_NAME}/${VERSION}"
   vardebug INSTALLER_FILE

@@ -17,7 +17,6 @@ function deploy_jetty {
 function install {
   VERSION="${2}"
   installer_init "${1}" "jetty-distribution-${VERSION}.tar.gz" "http://central.maven.org/maven2/org/eclipse/jetty/jetty-distribution/${VERSION}/jetty-distribution-${VERSION}.tar.gz"
-  vardebug INSTANCE OUTFILE INSTALLSRC RUNAS_USER INSTANCE_FOLDER VERSION OPTIONS
 
   EXIST_HOME="${INSTANCE_PATH}"
   vardebug EXIST_HOME
