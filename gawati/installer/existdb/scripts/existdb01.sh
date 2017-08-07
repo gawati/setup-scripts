@@ -2,8 +2,7 @@
 
 function install {
   VERSION="${2}"
-  iniget_installer "${1}" "eXist-db-setup-${VERSION}.jar" "https://bintray.com/existdb/releases/download_file?file_path=eXist-db-setup-${VERSION}.jar"
-  vardebug INSTANCE OUTFILE INSTALLSRC RUNAS_USER INSTANCE_FOLDER VERSION OPTIONS
+  installer_init "${1}" "eXist-db-setup-${VERSION}.jar" "https://bintray.com/existdb/releases/download_file?file_path=eXist-db-setup-${VERSION}.jar"
 
   EXIST_HOME="${INSTANCE_PATH}"
   vardebug EXIST_HOME
@@ -26,7 +25,6 @@ function install {
 
   message 1 "Installing to folder >${INSTANCE_FOLDER}< as user >${RUNAS_USER}<."
 
-  grep "^${RUNAS_USER}:.*" /etc/passwd >/dev/null || useradd "${RUNAS_USER}"
   sudo -u "${RUNAS_USER}" bash -s "${INSTANCE}" "${EXIST_HOME}" "${INSTALLSRC}" "${EXIST_PORT}" "${EXIST_SPORT}" "${EXIST_DATA}" <<'EndOfScriptAsRUNAS_USER'
     export INSTANCE="${1}"
     export EXIST_HOME="${2}"

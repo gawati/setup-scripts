@@ -16,8 +16,9 @@ function deploy_jetty {
 
 function install {
   VERSION="${2}"
-  iniget_installer "${1}" "jetty-distribution-${VERSION}.tar.gz" "http://central.maven.org/maven2/org/eclipse/jetty/jetty-distribution/${VERSION}/jetty-distribution-${VERSION}.tar.gz"
+  installer_init "${1}" "jetty-distribution-${VERSION}.tar.gz" "http://central.maven.org/maven2/org/eclipse/jetty/jetty-distribution/${VERSION}/jetty-distribution-${VERSION}.tar.gz"
   vardebug INSTANCE OUTFILE INSTALLSRC RUNAS_USER INSTANCE_FOLDER VERSION OPTIONS
+
   EXIST_HOME="${INSTANCE_PATH}"
   vardebug EXIST_HOME
 
@@ -39,7 +40,6 @@ function install {
     }
 
   message 1 "Installing to jetty-base folder >${INSTANCE_FOLDER}< as user >${RUNAS_USER}<."
-  grep "^${RUNAS_USER}:.*" /etc/passwd >/dev/null || useradd "${RUNAS_USER}"
 
   sudo -u "${RUNAS_USER}" bash -s "${INSTANCE}" "${JETTY_BASE}" "${UNPACKFOLDER}" "${JETTY_PORT}" "${JETTY_SPORT}" "${JETTY_MODULES}" <<'EndOfScriptAsRUNAS_USER'
     export INSTANCE="${1}"
