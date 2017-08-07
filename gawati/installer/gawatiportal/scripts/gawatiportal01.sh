@@ -8,8 +8,8 @@ function install {
   CFGSRC="${DOWNLOADFOLDER}/installer/${INSTALLER_NAME}/scripts/01"
   CFGDST="/etc/httpd/conf.d"
 
-  GAWATI_URL_ROOT="`iniget \"${INSTANCE}\" GAWATI_URL_ROOT`"
-  EXIST_BE_URL="`iniget \"${INSTANCE}\" EXIST_BE_URL`"
+  export GAWATI_URL_ROOT="`iniget \"${INSTANCE}\" GAWATI_URL_ROOT`"
+  export EXIST_BE_URL="`iniget \"${INSTANCE}\" EXIST_BE_URL`"
 
   for FILE in ${CFGFILES} ; do
     cfgwrite "${CFGSRC}/${FILE}" "${CFGDST}"
