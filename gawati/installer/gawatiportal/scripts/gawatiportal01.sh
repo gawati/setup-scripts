@@ -9,6 +9,7 @@ function install {
   CFGDST="/etc/httpd/conf.d"
 
   export GAWATI_URL_ROOT="`iniget \"${INSTANCE}\" GAWATI_URL_ROOT`"
+  export GAWATI_URL_ROOT_="`echo ${GAWATI_URL_ROOT} | tr . _`"
   export EXIST_BE_URL="`iniget \"${INSTANCE}\" EXIST_BE_URL`"
 
   for FILE in ${CFGFILES} ; do
