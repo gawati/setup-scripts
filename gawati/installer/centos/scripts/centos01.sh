@@ -4,9 +4,9 @@ function install {
 
   OSversion="`rpm -q --queryformat '%{VERSION}' centos-release`"
 
-  yum history summary | grep 'Last 3 months' | grep U || {
-    message 2 "More than 3 months since last yum repository check. Fetching updates..."
-    yum update
+  yum history summary | grep 'Last day\|Last week' >/dev/null | grep U || {
+    message 2 "More than 1 week since last yum repository check. Fetching updates..."
+    yum -y update
     }
 
   NrOfUpdates="`yum -q list updates | grep -v '^Updated Packages$' | wc -l`"
@@ -32,7 +32,7 @@ function install {
   MainIP="`iniget \"${INSTANCE}\" mainIP`"
 
   [ "${MainIP}" = "detect" ] && {
-    MainIP="`ip addr | grep inet | grep -v '127.0.0.1' | head -1 | xargs echo -n | cut -d ' ' -f 2 | cut -d '/' -f 1`"
+    MainIP="`ip addr | grep 'inet ' | grep -v '127.0.0.1' | head -1 | xargs echo -n | cut -d ' ' -f 2 | cut -d '/' -f 1`"
     }
 
   vardebug SHOSTNAME DNSdomain MainIP

@@ -1,3 +1,6 @@
+OSinstall gettext 1
+OSinstall iproute 1
+
 function set_environment_java {
   echo 'JAVA_HOME="`readlink -f /usr/bin/java | sed "s:/bin/java::"`"' >~/.javarc
   echo 'export JAVA_HOME' >>~/.javarc
@@ -67,7 +70,7 @@ function cfgdeploy {
   DSTFOLDER="${2}"
   SRCFOLDER="${3}"
 
-  [ "${SRCFOLDER}" = "" ] && SRCFOLDER+=/
+  [ "${SRCFOLDER}" = "" ] || SRCFOLDER+=/
 
   for FILE in ${FILES} ; do
     cfgwrite "${SRCFOLDER}${FILE}" "${DSTFOLDER}"
