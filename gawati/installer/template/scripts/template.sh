@@ -1,5 +1,6 @@
 function install {
   VERSION="${2}"
+  # Initialize variables and download a package. If no download is needed, provide only first argument. Skip arguments 2 and 3 or leave them empty.
   installer_init "${1}" "examplefile.png" "http://africaninnovation.org/img/logo.png"
 
   # The file downloaded is stored as
@@ -18,8 +19,8 @@ function install {
   message 1 "The package is intended to be installed for or as user >${RUNAS_USER}< and if started on bootup, should run as that user. If missing, the user was created by installer_init()."
   message 1 "The package is to be installed into folder >${INSTANCE_PATH}<."
   message 1 "If custom options were specified, these are the ones: >${OPTIONS}<"
-  message 2 "Warning"
-  message 3 "Error"
+  message 2 "Harmless Warning"
+  message 3 "Harmless Error"
 
   # Fetch a custom configiration item from ini file
   #MYITEM="`iniget \"${INSTANCE}\" myitem`"
