@@ -11,8 +11,9 @@ function installer_init {
   declare -g OUTFILE="${2}"
   declare -g SRCURL="${3}"
   declare -g INSTALLER_NAME="${INSTALLS[$INSTANCE]}"
+  declare -g INSTALLER_HOME="${DOWNLOADFOLDER}/installer/${INSTALLER_NAME}/scripts"
   declare -g INSTALLSRC="${DOWNLOADFOLDER}/${OUTFILE}"
-  vardebug INSTANCE OUTFILE SRCURL INSTALLER_NAME INSTALLSRC
+  vardebug INSTANCE OUTFILE SRCURL INSTALLER_NAME INSTALLER_HOME INSTALLSRC
 
   declare -g RUNAS_USER="`iniget \"${INSTANCE}\" user`"
   [ "${RUNAS_USER}" = "" ] && declare -g RUNAS_USER="${USER}"
