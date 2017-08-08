@@ -5,7 +5,7 @@ function install {
   installer_init "${1}" "" ""
   
   CFGFILES="10-gawati.conf"
-  CFGSRC="${DOWNLOADFOLDER}/installer/${INSTALLER_NAME}/scripts/01"
+  CFGSRC="${INSTALLER_HOME}/01"
   CFGDST="/etc/httpd/conf.d"
 
   export GAWATI_URL_ROOT="`iniget \"${INSTANCE}\" GAWATI_URL_ROOT`"
