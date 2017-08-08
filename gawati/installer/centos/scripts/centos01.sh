@@ -4,7 +4,7 @@ function install {
 
   OSversion="`rpm -q --queryformat '%{VERSION}' centos-release`"
 
-  yum history summary | grep 'Last day\|Last week' >/dev/null | grep U || {
+  yum history summary | grep 'Last day\|Last week' | grep U >/dev/null || {
     message 2 "More than 1 week since last yum repository check. Fetching updates..."
     yum -y update
     }
