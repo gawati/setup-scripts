@@ -85,6 +85,7 @@ STAMP="`timestamp`"
 TARGET="${1:-dev}"
 
 OSinstall wget 1
+OSinstall epel-release 1
 OSinstall crudini 1
 OSinstall subversion 1
 
