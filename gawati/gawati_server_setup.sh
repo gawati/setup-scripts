@@ -84,6 +84,7 @@ MYPID=$$
 STAMP="`timestamp`"
 TARGET="${1:-dev}"
 
+OSinstall sudo 1
 OSinstall wget 1
 OSinstall epel-release 1
 OSinstall crudini 1

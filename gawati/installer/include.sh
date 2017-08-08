@@ -16,7 +16,7 @@ function installer_init {
   vardebug INSTANCE OUTFILE SRCURL INSTALLER_NAME INSTALLER_HOME INSTALLSRC
 
   declare -g RUNAS_USER="`iniget \"${INSTANCE}\" user`"
-  [ "${RUNAS_USER}" = "" ] && declare -g RUNAS_USER="${USER}"
+  [ "${RUNAS_USER}" = "" ] && declare -g RUNAS_USER="`whoami`"
   vardebug RUNAS_USER
   grep "^${RUNAS_USER}:.*" /etc/passwd >/dev/null || useradd "${RUNAS_USER}" || bail_out 1 "Failed to add missing user >${RUNAS_USER}<."
 
