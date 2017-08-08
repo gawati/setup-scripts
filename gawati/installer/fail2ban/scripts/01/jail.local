@@ -1,0 +1,26 @@
+[DEFAULT]
+maxretry = 4
+
+# Override /etc/fail2ban/jail.d/00-firewalld.conf:
+banaction = iptables-multiport
+
+# Destination email address used solely for the interpolations in
+# jail.{conf,local,d/*} configuration files.
+destemail = ${EMAILrecipient}
+
+# Sender email address used solely for some actions
+sender = ${EMAILsender}
+
+
+[sshd]
+enabled = true
+findtime = 3600 ; 1 hour
+bantime  = 900  ; 15 minutes
+
+[recidive]
+enabled  = true
+findtime = 10800        ; 4 hours
+bantime  = 86400        ; 1 day
+maxretry = 3
+action = %(action_mw)s
+
