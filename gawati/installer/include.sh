@@ -73,6 +73,10 @@ function cfgdeploy {
   [ "${SRCFOLDER}" = "" ] || SRCFOLDER+=/
 
   for FILE in ${FILES} ; do
+    [ -f "${DSTFOLDER}/${FILE}" ] && {
+      message 2 ">${DSTFOLDER}/${FILE}< already exists. Not changing."
+      continue
+      }
     cfgwrite "${SRCFOLDER}${FILE}" "${DSTFOLDER}"
     done
   }
@@ -81,12 +85,30 @@ function cfgdeploy {
 function addtohosts {
   IP="${1}"
   NAMES="${*:2}"
+  CHANGES=0
+  ALLNAMES="`cat /etc/hosts | sed -r 's%^[0-9:\.]+(.*)%\1%g' | xargs -I str echo -n ' str '`"
   echo "$(cat /etc/hosts)" | grep -v "^${IP}\s" >/tmp/hosts.tmp
+  OTHERNAMES="`cat /tmp/hosts.tmp | sed -r 's%^[0-9:\.]+(.*)%\1%g' | xargs -I str echo -n ' str '`"
   HOSTSdata="`grep \"^${IP}\s\" /etc/hosts`"
-  HOSTSdata+=" ${NAMES}"
-  HOSTSdata="`echo ${HOSTSdata} |  tr ' ' '\n' | tail -n +2 | sort -ur | xargs echo -n`"
-  echo "${IP}       ${HOSTSdata}" >>/tmp/hosts.tmp
-  cat /tmp/hosts.tmp >/etc/hosts
-  rm -f /tmp/hosts.tmp
+
+  for NAME in ${NAMES} ; do
+    echo "${OTHERNAMES}" | grep " ${NAME} " >/dev/null && {
+      message 2 ">${NAME}< already assigned to different IP in /etc/hosts - not changing."
+      continue
+      }
+    HOSTSdata+=" ${NAME}"
+    echo "${ALLNAMES}" | grep " ${NAME} " >/dev/null || {
+      message 1 ">${NAME}< assigned to >${IP}< in /etc/hosts"
+      CHANGES+=1
+      }
+    done
+
+  [ "${CHANGES}" -gt 0 ] && {
+    HOSTSdata="`echo ${HOSTSdata} |  tr ' ' '\n' | tail -n +2 | sort -ur | xargs echo -n`"
+    echo "${IP}       ${HOSTSdata}" >>/tmp/hosts.tmp
+    [ -f "/etc/hosts.${STAMP}" ] || cat /etc/hosts >"/etc/hosts.${STAMP}"
+    cat /tmp/hosts.tmp >/etc/hosts
+    }
+  [ -f /tmp/hosts.tmp ] && rm -f /tmp/hosts.tmp
   }
 
