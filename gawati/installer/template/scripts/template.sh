@@ -21,6 +21,7 @@ function install {
   message 1 "If custom options were specified, these are the ones: >${OPTIONS}<"
   message 2 "Harmless Warning"
   message 3 "Harmless Error"
+  message 4 "Debug message at debug level 2 and greater." 2
 
   # Fetch a custom configiration item from ini file
   #MYITEM="`iniget \"${INSTANCE}\" myitem`"
