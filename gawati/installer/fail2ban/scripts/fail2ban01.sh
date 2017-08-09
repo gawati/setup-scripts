@@ -10,6 +10,8 @@ function install {
 
   CFGFOLDER="${INSTALLER_HOME}/01"
   cfgwrite "${CFGFOLDER}/jail.local" "/etc/fail2ban"
+  touch /var/log/fail2ban.log
+  chcon -u system_u /var/log/fail2ban.log
 
   systemctl enable fail2ban || message 3 "Failed to enable fail2ban service"
   systemctl start fail2ban || message 3 "Failed to start fail2ban service"
