@@ -7,50 +7,66 @@ function install {
 
   SRCFOLDER="${INSTALLER_HOME}/01"
 
-  [ -e /var/www/challenges/.well-known ] || {
-    mkdir -p /var/www/challenges/.well-known
+  DST=/var/www/challenges/.well-known
+  [ -e "${DST}" ] || {
+    mkdir -p "${DST}"
     chcon -R -u system_u /var/www/challenges
     }
 
-  [ -e /var/www/challenges/.well-known/acme-challenge ] || {
-    ln -s /var/www/challenges /var/www/challenges/.well-known/acme-challenge
-    chcon -h -u system_u /var/www/challenges/.well-known/acme-challenge
+  DST=/var/www/challenges/.well-known/acme-challenge
+  [ -e "${DST}" ] || {
+    ln -s /var/www/challenges "${DST}"
+    chcon -h -u system_u "${DST}"
     }
 
-  [ -e /etc/pki/tls/letsencrypt ] || {
-    mkdir /etc/pki/tls/letsencrypt
-    chcon -u system_u /etc/pki/tls/letsencrypt
-    }
-  [ -e /etc/ssl/letsencrypt ] || {
-    ln -s /etc/pki/tls/letsencrypt /etc/ssl/letsencrypt
-    chcon -h -u system_u /etc/ssl/letsencrypt
+  DST=/etc/pki/tls/letsencrypt
+  [ -e "${DST}" ] || {
+    mkdir "${DST}"
+    chcon -u system_u "${DST}"
     }
 
-  [ -e /etc/ssl/letsencrypt/identrust.pem ] || {
-    cp "${SRCFOLDER}/identrust.pem" /etc/ssl/letsencrypt/
-    chcon -u system_u /etc/ssl/letsencrypt/identrust.pem
+  DST=/etc/ssl/letsencrypt
+  [ -e "${DST}" ] || {
+    ln -s /etc/pki/tls/letsencrypt "${DST}"
+    chcon -h -u system_u "${DST}"
     }
 
-  [ -e /etc/ssl/letsencrypt/letsencrypt.pem ] || {
-    cp "${DOWNLOADFOLDER}/letsencrypt.pem" /etc/ssl/letsencrypt/
-    chcon -u system_u /etc/ssl/letsencrypt/letsencrypt.pem
+  DST=/etc/ssl/letsencrypt/identrust.pem
+  [ -e "${DST}" ] || {
+    cat "${SRCFOLDER}/identrust.pem" > "${DST}"
+    chcon -u system_u "${DST}"
     }
 
-  [ -e /etc/ssl/letsencrypt/chain.pem ] || {
-    cat /etc/ssl/letsencrypt/identrust.pem /etc/ssl/letsencrypt/letsencrypt.pem > /etc/ssl/letsencrypt/chain.pem
-    chcon -u system_u /etc/ssl/letsencrypt/chain.pem
+  DST=/etc/ssl/letsencrypt/letsencrypt.pem
+  [ -e "${DST}" ] || {
+    cat "${DOWNLOADFOLDER}/letsencrypt.pem" > "${DST}"
+    chcon -u system_u "${DST}"
     }
 
-  [ -e /etc/ssl/letsencrypt/account.key ] || {
-    openssl genpkey -algorithm rsa -pkeyopt rsa_keygen_bits:4096 -out /etc/ssl/letsencrypt/account.key
-    chcon -u system_u /etc/ssl/letsencrypt/account.key
-    chmod 640 /etc/ssl/letsencrypt/account.key
+  DST=/etc/ssl/letsencrypt/chain.pem
+  [ -e "${DST}" ] || {
+    cat /etc/ssl/letsencrypt/identrust.pem /etc/ssl/letsencrypt/letsencrypt.pem > "${DST}"
+    chcon -u system_u "${DST}"
     }
 
-  [ -e /etc/logrotate.d/acme ] || {
-    cp "${SRCFOLDER}/acme.logrotate" /etc/logrotate.d/acme
-    chcon -u system_u /etc/logrotate.d/acme
+  DST=/etc/ssl/letsencrypt/account.key
+  [ -e "${DST}" ] || {
+    openssl genpkey -algorithm rsa -pkeyopt rsa_keygen_bits:4096 -out "${DST}"
+    chcon -u system_u "${DST}"
+    chmod 640 "${DST}"
     }
 
+  DST=/etc/logrotate.d/acme
+  [ -e "${DST}" ] || {
+    cat "${SRCFOLDER}/acme.logrotate" > "${DST}"
+    chcon -u system_u "${DST}"
+    }
+
+  DST=/usr/local/bin/ssl-cert-check
+  [ -e "${DST}" ] || {
+    cat "${SRCFOLDER}/ssl-cert-check" > "${DST}"
+    chcon -u system_u "${DST}"
+    chmod 755 "${DST}"
+    }
   }
 
