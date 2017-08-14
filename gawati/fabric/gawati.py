@@ -1,9 +1,8 @@
-
 from __future__ import with_statement
 import os
 from fabric import state
 from fabric.api import *
-from fabric.colors import red, green
+from fabric.colors import red, green, blue
 from fabric.contrib.files import exists
 from ConfigParser import SafeConfigParser
 
@@ -79,11 +78,11 @@ class GitHubSource:
         # upload to server
         repos = self.cfgs.get_section("git_repos")
         src_path = self.cfgs.source_path()
-        run("mkdir -p %s" % src_path)
+        sudo("mkdir -p %s" % src_path)
         with cd(src_path):
-            for key,value in repos.iteritems():
-                print blue(" cloning %s" % key)
-                run("git clone %s" % value)
+            for folder_name, git_repo in repos.iteritems():
+                print blue(" cloning %s" % folder_name)
+                sudo("git clone %s %s" % (git_repo, folder_name))
 
 
     def build(self):
@@ -91,7 +90,10 @@ class GitHubSource:
         # any preprocess to be done here
         repos = self.cfgs.get_section("git_repos")
         with cd(self.cfgs.source_path()):
-            run("ant xar")
+            for folder_name, v in repos.iteritems():
+                print blue(" building %s" % folder_name)
+                with cd(folder_name):
+                    sudo("ant xar")
         
     def deploy_xar(self):
-        return ""
+        repos = self.cfgs.get_section("git_repos")
