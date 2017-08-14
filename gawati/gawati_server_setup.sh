@@ -84,7 +84,9 @@ MYPID=$$
 STAMP="`timestamp`"
 TARGET="${1:-dev}"
 
+OSinstall sudo 1
 OSinstall wget 1
+OSinstall epel-release 1
 OSinstall crudini 1
 OSinstall subversion 1
 
@@ -102,7 +104,6 @@ vardebug INIFILE
 message 1 "Reading installation instructions from >${INIFILE}<."
 
 TEMP="`crudini --get \"${INIFILE}\" options debug 2>/dev/null`" && DEBUG="${TEMP}"
-#PACKAGES="`crudini --get \"${INIFILE}\" options installPackages`"
 PACKAGES="`iniget options installPackages`"
 vardebug DEBUG PACKAGES
 
@@ -182,15 +183,28 @@ for INSTANCE in ${!INSTALLS[@]} ; do
   unset install
   INSTALLER_NAME="${INSTALLS[$INSTANCE]}"
   vardebug INSTALLER_NAME
-  #VERSION="`crudini --get \"${INIFILE}\" \"${INSTANCE}\" version`"
   VERSION="`iniget \"${INSTANCE}\" version`"
   vardebug VERSION
   INSTALLER_FILE="${DOWNLOADFOLDER}/installer/${INSTALLER_NAME}/${VERSION}"
   vardebug INSTALLER_FILE
-  [ -f "${INSTALLER_FILE}" ] || bail_out 1 "No installer available at >${INSTALLER_FILE}<."
+  [ -f "${INSTALLER_FILE}" ] || bail_out 1 "No installer available for >${INSTANCE}< at >${INSTALLER_FILE}<."
   . "${INSTALLER_FILE}"
   [ "`type -t install`" != function ] && bail_out 1 "No installer function defined."
   message 4 "Calling installer in >${INSTALLER_FILE}<." 2
   install "${INSTANCE}" "${VERSION}"
+
+  POSTINSTALL="`crudini --get \"${INIFILE}\" \"${INSTANCE}\" postinstall 2>/dev/null`"
+  vardebug POSTINSTALL
+  for TASK in ${POSTINSTALL} ; do
+    vardebug TASK
+    unset postinstall
+    TASK_FILE="${DOWNLOADFOLDER}/installer/${INSTALLER_NAME}/scripts/${TASK}.sh"
+    vardebug TASK_FILE
+    [ -f "${TASK_FILE}" ] || bail_out 1 "No postinstaller available for >${INSTANCE}< at >${TASK_FILE}<."
+    . "${TASK_FILE}"
+    [ "`type -t postinstall`" != function ] && bail_out 1 "No installer function defined."
+    message 4 "Calling installer in >${TASK_FILE}<." 2
+    postinstall
+    done
   done
 
