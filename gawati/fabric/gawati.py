@@ -22,7 +22,7 @@ class GawatiConfigReader:
 
 class GawatiConfigs:
     
-    config_path = "/root/dev.ini"
+    config_path = env.ini if "ini" in env else '/root/dev.ini'
 
     def __init__(self):
         self.gwconfig = GawatiConfigReader(self.config_path)
@@ -78,11 +78,11 @@ class GitHubSource:
         # upload to server
         repos = self.cfgs.get_section("git_repos")
         src_path = self.cfgs.source_path()
-        sudo("mkdir -p %s" % src_path)
+        run("mkdir -p %s" % src_path)
         with cd(src_path):
             for folder_name, git_repo in repos.iteritems():
                 print blue(" cloning %s" % folder_name)
-                sudo("git clone %s %s" % (git_repo, folder_name))
+                run("git clone %s %s" % (git_repo, folder_name))
 
 
     def build(self):
@@ -93,7 +93,76 @@ class GitHubSource:
             for folder_name, v in repos.iteritems():
                 print blue(" building %s" % folder_name)
                 with cd(folder_name):
-                    sudo("ant xar")
+                    run("ant xar")
         
-    def deploy_xar(self):
-        repos = self.cfgs.get_section("git_repos")
+    def deploy_xar(self, service):
+        
+        # prompt for password
+        
+        
+
+
+class Daemon:
+
+    daemons = ["httpd", "eXist-st", "eXist-be", "jetty-dev01"]
+    
+    def __init__(self):
+        self.cfgs = GawatiConfigs()
+
+        
+    def start(self, service):
+        if (service in self.daemons):
+
+            is_active = self._service_is_active(service)
+
+            if (is_active == "unknown"):
+                self._service_not_found_error(service)
+            elif (is_active == "failed"):
+                sudo("systemctl start %s" % service)
+            elif (is_active == "active"):
+                print red("Service %s is already running" % service)
+            else:
+                print red("Current service status cannot be determined, attempting to start %s" % service)
+                sudo("systemctl start %s" % service)
+        else:
+            self._service_not_found_error(service)
+
+    def stop(self, service):
+        if (service in self.daemons):
+
+            is_active = self._service_is_active(service)
+
+            if (is_active == "unknown"):
+                self._service_not_found_error(service)
+            elif (is_active == "failed"):
+                print red("Service %s is already stopped" % service)
+            elif (is_active == "active"):
+                sudo("systemctl stop %s" % service)
+            else:
+                print red("Current service status cannot be determined, attempting to stop %s" % service)
+                sudo("systemctl stop %s" % service)
+
+        else:
+
+            self._service_not_found_error(service)
+
+    def is_active(self, service):
+        active = self._service_is_active(service)
+        if (active == "failed"):
+            return False
+        elif (active == "active"):
+            return True
+        else:
+            print red("Service %s status is unknown" % active)
+            return False
+    
+    def _service_not_found_error(self, service):
+        print red("Service %s not found" % service)
+    
+   
+    def _service_is_active(self, service):
+        is_active = "failed"
+        with warn_only():
+            is_active = run("systemctl is-active %s" % service)
+        return is_active
+        
