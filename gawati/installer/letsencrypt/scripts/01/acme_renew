@@ -1,0 +1,61 @@
+#!/bin/bash
+
+exec 5> /tmp/debug.txt
+BASH_XTRACEFD="5"
+PS4='$LINENO: '
+set -x
+
+logfile="/var/log/acme_renew.log"
+maxagedays=10
+acme_challenge_dir="/var/www/challenges"
+interface="$(/usr/sbin/ip addr | grep '^2: ' | cut -d ' ' -f2 | cut -d ':' -f 1)"
+acme_certs_dir="/etc/ssl/letsencrypt"
+acme_domain="${1}"
+acme_file="$(echo ${acme_domain} | tr '.' '_')"
+acme_path="${acme_certs_dir}/${acme_file}"
+
+date >> "${logfile}"
+
+systemctl status httpd >/dev/null || {
+  echo "Apache not running. Cannot renew certificate. Exiting."
+  exit 1
+  }
+
+echo "Checking for certificate renewal for ${1}." >> "${logfile}"
+
+for type in 'crt' 'csr' 'key'; do
+  [ -f "${acme_path}.${type}" ] || {
+    echo "Certfile '${acme_path}.${type}' does not exist. Cannot proceed." >> "${logfile}"
+    exit 1
+    }
+  done
+
+
+/usr/local/bin/ssl-cert-check -n -x ${maxagedays} -c "${acme_path}.crt" >> "${logfile}" && {
+  echo "More than $[maxagedays-1] days left to expiry. No renewal needed." >> "${logfile}"
+  exit
+  }
+
+
+echo "Trying to renew certificate." >> "${logfile}"
+
+# Get updated certificate.
+echo "Requesting certificate update for <${acme_domain}>." | tee -a "${logfile}"
+if /usr/sbin/acme_tiny --account-key "${acme_certs_dir}/account.key" --csr "${acme_path}.csr" --acme-dir "${acme_challenge_dir}" > "${acme_path}_new.crt" 2>> "${logfile}"
+then
+  echo "Received new certificate." | tee -a "${logfile}"
+  if /usr/bin/openssl verify -CAfile "${acme_certs_dir}/chain.pem" "${acme_path}_new.crt"
+  then
+    cat "${acme_path}.crt" > "${acme_path}_prev.crt"
+    cat "${acme_path}_new.crt" > "${acme_path}.crt"
+    cat "${acme_path}.crt" "${acme_certs_dir}/chain.pem" > "${acme_path}.pem"
+    rm -f "${acme_path}_new.crt"
+    echo "Renewed certificate." | tee -a "${logfile}"
+    /usr/bin/systemctl restart httpd | tee -a "${logfile}"
+  else
+    echo "Certificate file check failed." | tee -a "${logfile}"
+  fi
+else
+   echo "Failed to receive certificate update." | tee -a "${logfile}"
+fi
+

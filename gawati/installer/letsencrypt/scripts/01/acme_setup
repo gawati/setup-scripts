@@ -1,0 +1,96 @@
+#!/bin/bash
+
+true && {
+  exec 5> /tmp/debug.txt
+  BASH_XTRACEFD="5"
+  PS4='$LINENO: '
+  set -x
+  }
+
+systemctl status httpd >/dev/null || {
+  echo "Apache not running. Cannot request certificate. Exiting."
+  exit 1
+  }
+
+[ "${1}" != "" ] && siteURL="${1}" || {
+  echo 'acme_setup <siteURL> <org> <country> <state> <location>'
+  echo 'First option is mandatory, all others optional but have to be specified in the given sequence.'
+  echo
+  echo 'Example: acme_setup "www.newdomain.tld" "My Company AG"'
+  exit
+  }
+
+[ "${2}" != "" ] && org="${2}" || org="ACME Installation Corp Ltd"
+[ "${3}" != "" ] && country="${3}" || country="CH"
+[ "${4}" != "" ] && state="${4}" || state="Zug"
+[ "${5}" != "" ] && location="${5}" || location="Zug"
+
+email="postmaster@$(echo ${siteURL} | sed 's%.*\.\(.*\..*\)$%\1%g')"
+siteURLnodot="$(echo ${siteURL} | tr '.' '_')"
+SSLdir="/etc/ssl/letsencrypt"
+
+echo "Creating certficate for ${siteURL}"
+echo "with metadata:"
+echo "Country: -${country}-"
+echo "State: -${state}-"
+echo "Location: -${location}-"
+echo "Organisation: -${org}-"
+echo "Email: -${email}-"
+
+while true; do
+  read -p "Do you wish to create certificate with these values (Yes/No/eXit)?" yn
+  case $yn in
+    [Yy]* ) break;;
+    [Nn]* ) exit;;
+    [Xx]* ) exit;;
+    * ) echo "Please answer yes or no.";;
+  esac
+done
+
+
+[ -d "/var/log/httpd/${siteURL}" ] && {
+  echo "Apache log folder /var/log/httpd/${siteURL} already exists, skipping."
+  } || {
+  echo "Creating Apache log folder /var/log/httpd/${siteURL}"
+  mkdir "/var/log/httpd/${siteURL}"
+  chcon -u system_u "/var/log/httpd/${siteURL}"
+  }
+
+[ -d "/var/www/html/${siteURL}" ] && {
+  echo "Apache virtual host root directory /var/www/html/${siteURL} already exists, skipping."
+  } || {
+  echo "Creating apache virtual host root directory /var/www/html/${siteURL}"
+  mkdir "/var/www/html/${siteURL}"
+  chcon -u system_u "/var/www/html/${siteURL}"
+  }
+
+SSLfilePath="${SSLdir}/${siteURLnodot}"
+
+[ -f "${SSLfilePath}.key" ] && {
+  echo "Private key ${SSLfilePath}.key already exists, skipping."
+  } || {
+  echo "Creating private key ${SSLfilePath}.key"
+  openssl genpkey -algorithm rsa -pkeyopt rsa_keygen_bits:2048 -out "${SSLfilePath}.key"
+  chcon -u system_u "${SSLfilePath}.key"
+  chmod 640 "${SSLfilePath}.key"
+  }
+
+[ -f "${SSLfilePath}.csr" ] && {
+  echo "Signing request ${SSLfilePath}.csr already exists, skipping."
+  } || {
+  echo "Creating signing request ${SSLfilePath}.csr"
+  openssl req -new -sha256 -key "${SSLfilePath}.key" -subj "/C=${country}/ST=${state}/L=${location}/O=${org}/OU=IT/CN=${siteURL}/emailAddress=${email}" -out "${SSLfilePath}.csr"
+  chcon -u system_u "${SSLfilePath}.csr"
+  }
+
+[ -f "${SSLfilePath}.crt" ] && {
+  echo "Certificate file ${SSLfilePath}.crt already exists. Please choose acme_renew to renew or delete the file before restarting acme_setup."
+  } || {
+  acme_tiny --account-key "${SSLdir}/account.key" --csr "${SSLfilePath}.csr" --acme-dir /var/www/challenges > "${SSLfilePath}.crt" && {
+    chcon -u system_u "${SSLfilePath}.crt"
+    cat "${SSLdir}/chain.pem" "${SSLfilePath}.crt" "${SSLfilePath}.key" > "${SSLfilePath}.pem"
+    openssl pkcs12 -export -out "${SSLfilePath}.pfx" -inkey "${SSLfilePath}.key" -in "${SSLfilePath}.crt"
+    }
+  [ "`wc -c ${SSLfilePath}.crt | cut -d ' ' -f 1`" = "0" ] && rm "${SSLfilePath}.crt"
+  }
+
