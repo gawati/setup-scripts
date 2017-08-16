@@ -17,3 +17,9 @@ function install {
     done
   }
 
+  DSTOBJ="/var/www/html/${GAWATI_URL_ROOT}"
+  [ -e "${DSTOBJ}" ] || {
+    mkdir -p "${DSTOBJ}"
+    chown root:apache "${DSTOBJ}"
+    }
+
