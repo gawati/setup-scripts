@@ -55,7 +55,7 @@ function cfgwrite {
     return
     }
 
-  [ -f "${DSTFILE}" ] && {
+  [ -e "${DSTFILE}" ] && {
     cp "${DSTFILE}" "${DSTFILE}.${STAMP}"
     }
 
@@ -106,7 +106,7 @@ function addtohosts {
   [ "${CHANGES}" -gt 0 ] && {
     HOSTSdata="`echo ${HOSTSdata} |  tr ' ' '\n' | tail -n +2 | sort -ur | xargs echo -n`"
     echo "${IP}       ${HOSTSdata}" >>/tmp/hosts.tmp
-    [ -f "/etc/hosts.${STAMP}" ] || cat /etc/hosts >"/etc/hosts.${STAMP}"
+    [ -e "/etc/hosts.${STAMP}" ] || cat /etc/hosts >"/etc/hosts.${STAMP}"
     cat /tmp/hosts.tmp >/etc/hosts
     }
   [ -f /tmp/hosts.tmp ] && rm -f /tmp/hosts.tmp
