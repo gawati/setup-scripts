@@ -39,6 +39,19 @@ def source_deploy():
     ghub.build()
     ghub.deploy()
 
+def deploy_exist_modules(service):
+    
+    """
+    
+    """
+    ed = gawati.ExistDeploy(service)
+    from getpass import getpass
+    _user = getpass("Enter user name:")
+    _pass = getpass("Enter password:")
+    ed.run_on_server("repo:list()", _user, _pass)
+    ##  print ed.exist_folder()    
+    
+
 
 def start(service):
     """
@@ -53,6 +66,7 @@ def stop(service):
     """
     daemon = gawati.Daemon()
     daemon.stop(service)
+
 
 
 
