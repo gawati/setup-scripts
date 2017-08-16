@@ -133,9 +133,15 @@ class GitHubSource:
                     run("ant xar")
         
 
-class ExistDeploy:
+class ExistServer:
 
     """
+    Provides methods to access the eXist server.
+    Run XQuerys as naked XQueries (passed as a string)
+    or
+    Run XQuery statements listed in a file. Configuration is picked up from dev.ini
+    
+    
     [eXist-st]
     type=install
     installer=existdb
@@ -153,21 +159,12 @@ class ExistDeploy:
 
         self.cfgs = GawatiConfigs()    
         self.exist_cfg = self.cfgs.get_section(exist_service)
-        self.exist_user_home = "/home/%s" % self.exist_cfg["user"]
+        # this returns the full home directory of the user
+        self.exist_user_home = run("echo ~%s" % self.exist_cfg["user"]) ##was## "/home/%s" % self.exist_cfg["user"]
         instance_folder = self.exist_cfg["instanceFolder"]
-
-        def full_path_to_exist():
-                        
-            if (instance_folder.startswith("~")):
-                return self.exist_user_home + instance_folder.replace("~", "")
-            else:
-                return instance_folder
-        
-        self.exist_folder = full_path_to_exist()
+        self.exist_folder = os.path.expanduser(instance_folder) # expand the instance folder, i.e. expand ~ to full path
         print blue("Full path to eXist %s " % self.exist_folder)
     
-    def exist_folder(self):
-        return self.exist_folder            
 
     def server_uri(self):
         """
@@ -176,22 +173,155 @@ class ExistDeploy:
         return "xmldb:exist://%s:%s/exist/xmlrpc" % ('localhost', str(self.exist_cfg['port']))
 
 
-    def run_on_server(self, xquery, user, passw):
+   
+    def execute_query(
+        self, 
+        xquery, 
+        user, 
+        passw
+        ):
+        """
+        Runs the input XQuery commands on the server
+        """
         run_map = {}
         run_map["folder"] = self.exist_folder
         run_map["server_uri"] = self.server_uri()
         run_map["user"] =  user
         run_map["password"] = passw
         run_map["xquery"] = xquery
-        run_cmd = self._run_on_server_tmpl(run_map)
-        with hide('running', 'stdout'):        
-            run(run_cmd)
+        run_cmd = self._execute_query_tmpl(run_map)
+        with hide('running'):        
+            return run(run_cmd)
 
 
-    def _run_on_server_tmpl(self, tmpl_dict):
-        return 'cd %(folder)s && bin/client.sh -ouri=%(server_uri)s -u %(user)s -P %(password)s -x  "%(xquery)s" ' % tmpl_dict
+
+    def execute_file(
+        self, 
+        xquery_file, 
+        user, 
+        passw
+        ):
+        """
+        Runs the input XQuery script file on the server
+        """
+        run_map = {}
+        run_map["folder"] = self.exist_folder
+        run_map["server_uri"] = self.server_uri()
+        run_map["user"] =  user
+        run_map["password"] = passw
+        run_map["xquery_file"] = xquery_file
+        run_cmd = self._execute_file_tmpl(run_map)
+        with hide('running'):        
+            return run(run_cmd)
+
+
+    def _execute_query_tmpl(self, tmpl_dict):
+        run_tmpl = (
+           'cd %(folder)s && bin/client.sh ', 
+            '-ouri=%(server_uri)s ', 
+            '-u %(user)s -P %(password)s ',
+            '-x  "%(xquery)s" '
+        )
+        return run_tmpl % tmpl_dict
   
+    def _execute_file_tmpl(self, tmpl_dict):
+        run_tmpl = (
+           'cd %(folder)s && bin/client.sh ', 
+            '-ouri=%(server_uri)s ', 
+            '-u %(user)s -P %(password)s ',
+            '-x  "%(xquery_file)s" '
+        )
+        return run_tmpl % tmpl_dict
       
+
+
+class XarPackage:
+    """
+    This class works with eXist XAR Packages
+    """
+    
+    def __init__(self, service):
+        """ 
+        :param: service is the name of the eXist service 
+        """
+        self.exist_server = ExistServer(service)
+
+    def remove(xar_name, exist_user, exist_pw):
+        """
+        Uninstalls a package from the server. The full package identifier has to be provided
+        Package is undeployed and removed from the repository
+        """
+        tmpl = Templates(self.exist_server.cfgs)
+        new_file = tmpl.new_file("xql", "uninstal_app.xqlt", {"app_name": xar_name})
+        std_out = self.exist_server.execute_file(new_file, exist_user, exist_pw)         
+        return std_out    
+         
+
+class Templates:
+
+    templates = ["xql"]
+    templates_folder_name = "templates"
+    runtime_folder_name = "runtime"
+
+    def __init__(self, cfgs):
+        self.cfgs = cfgs
+        self.template_folder = os.path.join(
+            self.cfgs.fab_path(), 
+            self.templates_folder_name
+        )
+        self.runtime_folder = os.path.join(
+            self.cfgs.fab_path(),
+            self.runtime_folder_name
+        )
+        print blue(" Template folder set to : %s" % self.template_folder)
+        print blue(" Runtime folder set to : %s" % self.runtime_folder)
+
+    def template(
+        self, 
+        template_type, 
+        template_file, 
+        template_map
+        ):
+        """
+        This function uses the template, applies the template map and generates the complete file content, returns a string
+
+        :param: template_type is the type of template, always the name of the sub-folder within templates
+        :param: template_file the name of the template file. Recommended to have a suffix extension of 4 letters. e.g. "xqlt"
+        :param: template_map the substitution map
+        """
+        ftmpl = open(
+            os.path.join(self.template_folder, template_type, template_file )
+        )
+        fcontents = ftmpl.read()
+        return fcontents % template_map
+  
+
+    def name_from_template(self, file_name):
+        """
+        Returns the prefix of the file name
+        """
+        from posixpath import basename
+        return os.path.splitext(basename(file_name))[0]
+
+    
+    def new_file(
+        self,
+        template_type,
+        template_file,
+        template_map
+        ):
+        """
+        Generates a template and writes it to the runtime folder
+        """
+        contents = self.template(template_type, template_file, template_map)
+        new_file = self.name_from_template(template_file) + "." + template_type
+        print blue("new file from template going to be created %s" % new_file)
+        path_to_new_file = os.path.join(self.runtime_folder, new_file)
+        fnewfile = open(path_to_new_file, "w")
+        fnewfile.write(contents)
+        fnewfile.close()
+        return path_to_new_file
+
 
 class Daemon:
 

@@ -1,10 +1,20 @@
 from fabric.api import run
 import gawati
+"""
+This module is the entry point to all fabric actions.
+You can run:
+    
+    ./fab --list 
+To see a list of available actions
+"""
+
+
 
 
 def checkout():
     """
-    Checkout from Github
+    Checkout code for all configured packages from Github
+    Packages are picked up in the order listed in the [git_repos] section
     """
 
     ghub = gawati.GitHubSource()
@@ -12,7 +22,7 @@ def checkout():
 
 def build():
     """
-    Build checked out code; expects 'checkout' to have been run
+    Build checked out code; expects 'checkout' to have been run 
     """
 
     ghub = gawati.GitHubSource()
@@ -31,24 +41,18 @@ def source_deploy():
     """
     Does a source checkout, build and deploy
     """
-    # checkout source code
-    # build it 
-    # upload to server
     ghub = gawati.GitHubSource()
     ghub.checkout()
     ghub.build()
     ghub.deploy()
 
 def deploy_exist_modules(service):
-    
     """
-    
+    Deploys all built eXist modules from  ./src 
     """
-    ed = gawati.ExistDeploy(service)
-    from getpass import getpass
-    _user = getpass("Enter user name:")
-    _pass = getpass("Enter password:")
-    ed.run_on_server("repo:list()", _user, _pass)
+    ed = gawati.ExistService(service)
+    up = _prompt_user_pass()
+    ed.run_on_server("repo:list()", up["user"], up["password"])
     ##  print ed.exist_folder()    
     
 
@@ -68,5 +72,15 @@ def stop(service):
     daemon.stop(service)
 
 
+def remove_xar(service, xar_name="http://exist-db.org/apps/preconferece-2017"):
+    # !+(AH, 2017-08-16) to be completed
+    xar = XarPackage(service)
+    up = _prompt_user_pass()
+    out = xar.remove(xar_name, up["user"], up["password"])
+    print "<remove_xar>%s</remove_xar>" % out
 
-
+def _prompt_user_pass():
+    from getpass import getpass
+    _user = getpass("Enter user name:")
+    _pass = getpass("Enter password:")
+    return {'user': _user, 'password': _pass}
