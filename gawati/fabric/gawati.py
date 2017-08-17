@@ -161,8 +161,22 @@ class ExistServer:
         self.exist_cfg = self.cfgs.get_section(exist_service)
         # this returns the full home directory of the user
         self.exist_user_home = run("echo ~%s" % self.exist_cfg["user"]) ##was## "/home/%s" % self.exist_cfg["user"]
-        instance_folder = self.exist_cfg["instanceFolder"]
-        self.exist_folder = os.path.expanduser(instance_folder) # expand the instance folder, i.e. expand ~ to full path
+        """
+        If the instance folder starts with ~ replace it with the user home for eXist user
+        Otherwise return the folder itself
+        """
+        def instance_folder():
+            instance_folder = self.exist_cfg["instanceFolder"]
+            if (instance_folder.startswith("~")):
+                return os.path.join(self.exist_user_home, instance_folder.replace("~/", ""))
+            else:
+                return instance_folder 
+
+        """
+        expand the instance folder, i.e. expand ~ to full path
+        """
+        self.exist_folder = instance_folder()
+        self.exist_autodeploy = os.path.join(self.exist_folder, "autodeploy")
         print blue("Full path to eXist %s " % self.exist_folder)
     
 
@@ -190,7 +204,7 @@ class ExistServer:
         run_map["password"] = passw
         run_map["xquery"] = xquery
         run_cmd = self._execute_query_tmpl(run_map)
-        with hide('running'):        
+        with hide('running', 'stdout', 'stderr'):        
             return run(run_cmd)
 
 
@@ -211,7 +225,7 @@ class ExistServer:
         run_map["password"] = passw
         run_map["xquery_file"] = xquery_file
         run_cmd = self._execute_file_tmpl(run_map)
-        with hide('running'):        
+        with hide('running', 'stdout', 'stderr'):        
             return run(run_cmd)
 
 
@@ -222,18 +236,57 @@ class ExistServer:
             '-u %(user)s -P %(password)s ',
             '-x  "%(xquery)s" '
         )
-        return run_tmpl % tmpl_dict
+        return ''.join(run_tmpl) % tmpl_dict
   
     def _execute_file_tmpl(self, tmpl_dict):
         run_tmpl = (
            'cd %(folder)s && bin/client.sh ', 
             '-ouri=%(server_uri)s ', 
             '-u %(user)s -P %(password)s ',
-            '-x  "%(xquery_file)s" '
+            '-F  "%(xquery_file)s" '
         )
-        return run_tmpl % tmpl_dict
-      
+        return ''.join(run_tmpl) % tmpl_dict
+    
+    def clean_autodeploy_for_pkg(self, xar_pkg_file_name, force=True):
+        xar_prefix = xar_pkg_file_name.split("-")[0]
+        xar_path_adeploy = os.path.join(self.exist_autodeploy, xar_pkg_file_name)
+        if (
+            os.path.isfile(
+                xar_path_adeploy
+            )
+        ):
+            """
+            File already exists
+            """
+            if (force):
+                print blue("Cleaning up auto-deploy folder ")
+                """
+                If it exists delete it,
+                remove all other related files
+                """
+                os.remove(xar_path_adeploy)
+                from glob import glob
+                for xar_del in glob(
+                        os.path.join(
+                            self.exist_autodeploy, 
+                            xar_prefix + "*.xar"
+                        )
+                ):
+                    os.remove(xar_del)
+            else:
+                print blue("Ignore cleanup of autodepoly folder")
+        else:
+            print green("Nothing to cleanup")
 
+    
+    def deploy_xar(self, xar_path):
+        """
+        Deploy XAR file
+        """
+        import shutil
+        print blue("Deploy XAR: copying %s to %s" % (xar_path, self.exist_autodeploy))
+        shutil.copy2(xar_path, self.exist_autodeploy)
+                                
 
 class XarPackage:
     """
@@ -242,22 +295,64 @@ class XarPackage:
     
     def __init__(self, service):
         """ 
-        :param: service is the name of the eXist service 
+        :param service: service is the name of the eXist service 
         """
+        self.exist_service = service
         self.exist_server = ExistServer(service)
 
-    def remove(xar_name, exist_user, exist_pw):
+    def remove(self, xar_name, exist_user, exist_pw):
         """
         Uninstalls a package from the server. The full package identifier has to be provided
         Package is undeployed and removed from the repository
+        
+        :param xar_name: identifier of the xar package to be removed
+        :param exist_user: typically the admin user in eXist
+        :param exist_pw: the password of the exist_user
         """
         tmpl = Templates(self.exist_server.cfgs)
-        new_file = tmpl.new_file("xql", "uninstal_app.xqlt", {"app_name": xar_name})
+        new_file = tmpl.new_file("xql", "uninstall_app.xqlt", {"app_name": xar_name})
+        print blue("Uninstalling %s on the server" % xar_name)        
         std_out = self.exist_server.execute_file(new_file, exist_user, exist_pw)         
-        return std_out    
+        return std_out
+
+    def is_valid(self, xar_path):
+        import zipfile
+        xar_file = zipfile.ZipFile(xar_path)
+        file_name = os.path.basename(xar_path)
+        test = xar_file.testzip()
+        if (test is not None):
+            print red("The xar file %s is corrupt" % file_name)
+            return "file-corrupt"
+        else:
+            return "file-valid"
+        
+
+    def deploy(self, xar_path):
+        """
+        
+        """
+        xar_file_name = os.path.basename(xar_path)
+        xar_valid = self.is_valid(xar_path)
+        if (xar_valid):
+            print "%s is a valid xar package" % xar_file_name
+            self.exist_server.clean_autodeploy_for_pkg(xar_file_name)
+            self.exist_server.deploy_xar(xar_path)
+            daemon = Daemon()
+            daemon.restart(self.exist_service)
+            return "deployed"
+        else:
+            print red("%s package cannot be deployed as the file is not valid" % xar_file_name)
+            return "invalid-file"
+       
          
 
 class Templates:
+    """
+    This module applies string and dictionary parameter templates
+    to generate configuation and code files. For example, the uninstall_app.xqlt template
+    is XQuery code to remove a package from eXist. the Parameter that is applied in to 
+    generate an executable code file is the package name
+    """
 
     templates = ["xql"]
     templates_folder_name = "templates"
@@ -285,9 +380,9 @@ class Templates:
         """
         This function uses the template, applies the template map and generates the complete file content, returns a string
 
-        :param: template_type is the type of template, always the name of the sub-folder within templates
-        :param: template_file the name of the template file. Recommended to have a suffix extension of 4 letters. e.g. "xqlt"
-        :param: template_map the substitution map
+        :param template_type: is the type of template, always the name of the sub-folder within templates
+        :param template_file: the name of the template file. Recommended to have a suffix extension of 4 letters. e.g. "xqlt"
+        :param template_map: the substitution map
         """
         ftmpl = open(
             os.path.join(self.template_folder, template_type, template_file )
@@ -312,6 +407,13 @@ class Templates:
         ):
         """
         Generates a template and writes it to the runtime folder
+
+        :param template_type: the type of the template. Corresponds to the
+               folder name of the type. e.g. "xql" and also the extension of the
+               runtime. e.g. "xql" template type generates .xql files. 
+        :param template_file: the name of the template file to be used
+        :param template_map: the dictionary containing parameters to be set on the 
+               template
         """
         contents = self.template(template_type, template_file, template_map)
         new_file = self.name_from_template(template_file) + "." + template_type
@@ -340,20 +442,8 @@ class Daemon:
         """
         Start the input service
         """                
-
         if (service in self.daemons):
-
-            is_active = self._service_is_active(service)
-
-            if (is_active == "unknown"):
-                self._service_not_found_error(service)
-            elif (is_active == "failed"):
-                sudo("systemctl start %s" % service)
-            elif (is_active == "active"):
-                print red("Service %s is already running" % service)
-            else:
-                print red("Current service status cannot be determined, attempting to start %s" % service)
-                sudo("systemctl start %s" % service)
+            run("systemctl start %s" % service)
         else:
             self._service_not_found_error(service)
 
@@ -361,30 +451,26 @@ class Daemon:
         """
         Stop the input service
         """
-
         if (service in self.daemons):
-
-            is_active = self._service_is_active(service)
-
-            if (is_active == "unknown"):
-                self._service_not_found_error(service)
-            elif (is_active == "failed"):
-                print red("Service %s is already stopped" % service)
-            elif (is_active == "active"):
-                sudo("systemctl stop %s" % service)
-            else:
-                print red("Current service status cannot be determined, attempting to stop %s" % service)
-                sudo("systemctl stop %s" % service)
-
+            run("systemctl stop %s" % service)
         else:
-
             self._service_not_found_error(service)
+
+
+    def restart(self, service):
+        """
+        Restart the input service
+        """
+        if (service in self.daemons):
+            run("systemctl restart %s" % service)
+        else:
+            self._service_not_found_error(service)
+
 
     def is_active(self, service):
         """
         Checks the current status of the service, if its running or not
         """
-
         active = self._service_is_active(service)
         if (active == "failed"):
             return False

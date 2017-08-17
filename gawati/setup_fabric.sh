@@ -1,3 +1,7 @@
+#
+# NOTE: This script must be run only after a successful run of gawati_server_setup.sh
+# It expects the basic components installed by gawati_server_setup to be in place !
+#
 #!/bin/bash
 
 # name of the python virtual-env for fabric
