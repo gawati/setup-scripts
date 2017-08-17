@@ -1,0 +1,25 @@
+xquery version "3.1";
+
+import module namespace repo="http://exist-db.org/xquery/repo";
+
+(: app_name is substituted with the actual app name :)
+let $app-to-remove := "%(app_name)s"
+let $list := repo:list()
+return
+    if ($app-to-remove = $list) then
+        (: <repo:status xmlns:repo="http://exist-db.org/xquery/repo" result="ok" target="ccomm1"/> :)
+        let $undep_status := repo:undeploy($app-to-remove)    
+        return
+            if ($undep_status/@result eq "ok") then
+                (: remove :)
+                let $remove_status := repo:remove($app-to-remove)
+                return
+                    if ($remove_status eq true()) then
+                        "removed"
+                    else
+                        "remove-failed"
+            else
+                 "unable-to-uninstall"
+    else
+        "app-not-found"
+        
