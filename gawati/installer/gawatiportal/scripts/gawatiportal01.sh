@@ -15,11 +15,19 @@ function install {
   for FILE in ${CFGFILES} ; do
     cfgwrite "${CFGSRC}/${FILE}" "${CFGDST}"
     done
-  }
 
   DSTOBJ="/var/www/html/${GAWATI_URL_ROOT}"
   [ -e "${DSTOBJ}" ] || {
     mkdir -p "${DSTOBJ}"
     chown root:apache "${DSTOBJ}"
     }
+
+  DSTOBJ="/etc/httpd/logs/${GAWATI_URL_ROOT}"
+  [ -e "${DSTOBJ}" ] || {
+    mkdir -p "${DSTOBJ}"
+    chown root:apache "${DSTOBJ}"
+    chmod 770 "${DSTOBJ}"
+    }
+
+  }
 
