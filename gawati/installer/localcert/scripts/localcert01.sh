@@ -1,3 +1,5 @@
+OSinstall openssl 1
+
 function install {
   VERSION="${2}"
   installer_init "${1}" "" ""

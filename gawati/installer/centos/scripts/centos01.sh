@@ -9,6 +9,8 @@ function install {
     yum -y update
     }
 
+  OSinstall deltarpm 1
+
   NrOfUpdates="`yum -q list updates | grep -v '^Updated Packages$' | wc -l`"
   [ "${NrOfUpdates}" -gt 0 ] && {
     message 2 "${NrOfUpdates} updates available. Applying."

@@ -130,36 +130,26 @@ popd >/dev/null
 
 
 TASKS="`crudini --get \"${INIFILE}\" | grep -v options`"
-declare -A RESOURCES
-declare -A INSTALLS
-declare -A COLLECTION
-declare -a NEEDED_RESOURCES
 
+INSTALLS=""
 for TASK in ${TASKS} ; do
   vardebug TASK
   TYPE="`iniget "${TASK}" type`"
   vardebug TYPE
-  #[ "${TYPE}" = "resource" ] && RESOURCES+=(["${TASK}"]="`iniget \"${TASK}\" download`")
-  [ "${TYPE}" = "install" ] && { 
-    INSTALLS+=(["${TASK}"]="`iniget \"${TASK}\" installer`")
-    #for TEMP in `iniget "${TASK}" resources`; do
-    #  COLLECTION[${TEMP}]=1
-    #  done
+  [ "${TYPE}" = "install" ] && {
+    [ "${INSTALLS}" = "" ] || INSTALLS+=" "
+    INSTALLS+="${TASK}"
     }
   done
 
-for TEMP in ${!COLLECTION[@]} ; do
-  NEEDED_RESOURCES+=(${TEMP})
-  done
-
-arrdebug NEEDED_RESOURCES
+arrdebug RESOURCES
 
 pushd "${DOWNLOADFOLDER}" >/dev/null || bail_out 1 "Failed to enter folder >${DOWNLOADFOLDER}<."
 
-for RESOURCE in ${NEEDED_RESOURCES[@]} ; do
+for RESOURCE in ${RESOURCES} ; do
   vardebug RESOURCE
-  OUTFILE="`echo ${RESOURCES[$RESOURCE]} | cut -d ' ' -f 1`"
-  URL="`echo ${RESOURCES[$RESOURCE]} | cut -d ' ' -f 2-`"
+  OUTFILE="`echo ${$RESOURCE} | cut -d ' ' -f 1`"
+  URL="`echo ${RESOURCE} | cut -d ' ' -f 2-`"
   vardebug OUTFILE URL
   [ -f "${OUTFILE}" ] || {
     download "${OUTFILE}" "${URL}" || bail_out 2 "Failed to download >${OUTFILE}< for resource >${RESOURCE}< from >${URL}<."
@@ -177,11 +167,12 @@ source "${LIBRARY}"
 
 set_environment_java
 
-for INSTANCE in ${!INSTALLS[@]} ; do
+vardebug INSTALLS
+for INSTANCE in ${INSTALLS} ; do
   [ "${INSTANCE}" = "" ] && bail_out 1 "Installer instance name empty."
   vardebug INSTANCE
   unset install
-  INSTALLER_NAME="${INSTALLS[$INSTANCE]}"
+  INSTALLER_NAME="`iniget \"${INSTANCE}\" installer`"
   vardebug INSTALLER_NAME
   VERSION="`iniget \"${INSTANCE}\" version`"
   vardebug VERSION
