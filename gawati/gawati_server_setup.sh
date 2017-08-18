@@ -95,8 +95,14 @@ vardebug INIFILE
 
 [ -f "${INIFILE}" ] || {
   download "${INIFILE}" "https://github.com/gawati/setup-scripts/raw/master/gawati/ini/${TARGET}.ini" || message 2 "Failed to download an installation template for >${TARGET}< at Gawati."
-  message 1 "Please verify installation parameters in >${INIFILE}<."
-  message 1 "Then rerun ${0} to install."
+  grep '^tsflags' /etc/yum.conf | cut -d '=' -f 2- | grep -i nodocs >/dev/null && {
+    message 1 "You have disabled documentation installation in >/etc/yum.conf<".
+    message 1 "This will produce warning messages like: >install-info: No such file or directory for /usr/share/info/...<".
+    message 1 "You can ignore these messages."
+    message 1 "If you want to install documentation instead, please remove the >nodocs< flag from >tsflags< in >/etc/yum.conf<".
+    }
+  message 2 "Please verify installation parameters in >${INIFILE}<."
+  message 2 "Then rerun ${0} to install."
   exit 0
   }
 
