@@ -1,5 +1,5 @@
 from __future__ import with_statement
-import os
+import os, sys
 from fabric import state
 from fabric.api import *
 from fabric.colors import red, green, blue
@@ -25,24 +25,21 @@ class GawatiConfigReader:
         self.config.read(inifile)
 
 
-
-
-class GawatiConfigs:
+class Configs:
     """
-    Loads the configuration ini file from the command line e.g.:
-        
-        fab -H localhost --ini /home/user/dev.ini
+    The base class for configs
+    """
 
-    If no parameter is specified, looks for a ini file called 'dev.ini' in the 
-    /root folder        
-
-    """        
-
-    config_path = env.ini if "ini" in env else '/root/dev.ini'
+    config_path = None
 
     def __init__(self):
         print blue("Reading ini file in %s" % self.config_path)
-        self.gwconfig = GawatiConfigReader(self.config_path)
+
+        if (os.access(self.config_path, os.R_OK) is not True):
+            print red("Unable to read ini file %s, possibly no permissions or does not exist" % self.config_path)
+            sys.exit()
+         
+        self.gcr = GawatiConfigReader(self.config_path)
 
     def fab_path(self):
         """
@@ -65,33 +62,40 @@ class GawatiConfigs:
         """
         Returns the items of the specified section name in the input ini file.
         """
-        return dict(self.gwconfig.config.items(section_name))
+        return dict(self.gcr.config.items(section_name))
 
 
-    def get_config(self, section_name, config_name, raw=False):
-        """
-        Gets a parameter value for a parameter from a section
 
-        :param section_name: The name of the section in the ini file
-        :param config_name: The name of the parameter in the section
-        :param raw: Setting the raw parameter gets the raw - non-interpolated value
+
+class BuildConfigs(Configs):
+    """
+    Loads the build configuration ini file from the command line e.g.:
         
-        """
-        if self.gwconfig.config.has_section(section_name):
-            if self.gwconfig.config.has_option(section_name, config_name):
-                return self.gwconfig.config.get(
-                        section_name,
-                        config_name,
-                        raw
-                        ).strip()
-            else:
-                #print "warning : section [", section_name, \
-                #    "] does not have option name ", config_name, " !!!!"
-                return ""
-        else:
-            #print "warning: section [", section_name, \
-            #    "] does not exist !!!"
-            return ""
+        fab -H localhost --set build-ini=/home/user/build.ini
+
+    If no parameter is specified, looks for a ini file called 'build.ini' in the 
+    ./ini folder        
+    """
+    config_path = env["build-ini"] if "build-ini" in env else '../ini/build.ini'
+
+
+
+class GawatiConfigs(Configs):
+    """
+    Loads the system setup configuration ini file from the command line e.g.:
+        
+        fab -H localhost --set setup-ini=/home/user/dev.ini
+
+    If no parameter is specified, looks for a ini file called 'dev.ini' in the 
+    /root folder.
+    To set setup-ini and build-ini together:
+
+        fab -H localhost --set setup-ini=/home/user/dev.ini,build-ini=/home/user/build.ini
+
+    """        
+
+    config_path = env['setup-ini'] if "setup-ini" in env else '/root/dev.ini'
+
 
 
 
@@ -101,7 +105,7 @@ class GitHubSource:
     """
 
     def __init__(self):
-        self.cfgs = GawatiConfigs()    
+        self.build_cfg = BuildConfigs()    
 
     def checkout(self):
         """
@@ -110,8 +114,8 @@ class GitHubSource:
         # checkout source code
         # build it 
         # upload to server
-        repos = self.cfgs.get_section("git_repos")
-        src_path = self.cfgs.source_path()
+        repos = self.build_cfg.get_section("git_repos")
+        src_path = self.build_cfg.source_path()
         run("mkdir -p %s" % src_path)
         with cd(src_path):
             for folder_name, git_repo in repos.iteritems():
@@ -125,8 +129,8 @@ class GitHubSource:
         """        
 
         # any preprocess to be done here
-        repos = self.cfgs.get_section("git_repos")
-        with cd(self.cfgs.source_path()):
+        repos = self.build_cfg.get_section("git_repos")
+        with cd(self.build_cfg.source_path()):
             for folder_name, v in repos.iteritems():
                 print blue(" building %s" % folder_name)
                 with cd(folder_name):
@@ -137,9 +141,12 @@ class ExistServer:
 
     """
     Provides methods to access the eXist server.
+    
     Run XQuerys as naked XQueries (passed as a string)
     or
-    Run XQuery statements listed in a file. Configuration is picked up from dev.ini
+    Run XQuery statements listed in a file. 
+
+    Configuration is picked up from dev.ini, example section is provided below:
     
     
     [eXist-st]
@@ -157,8 +164,8 @@ class ExistServer:
 
     def __init__(self, exist_service):
 
-        self.cfgs = GawatiConfigs()    
-        self.exist_cfg = self.cfgs.get_section(exist_service)
+        self.setup_cfg = GawatiConfigs()    
+        self.exist_cfg = self.setup_cfg.get_section(exist_service)
         # this returns the full home directory of the user
         self.exist_user_home = run("echo ~%s" % self.exist_cfg["user"]) ##was## "/home/%s" % self.exist_cfg["user"]
         """
@@ -297,6 +304,7 @@ class XarPackage:
         """ 
         :param service: service is the name of the eXist service 
         """
+        self.build_cfg = BuildConfigs()
         self.exist_service = service
         self.exist_server = ExistServer(service)
 
@@ -309,13 +317,16 @@ class XarPackage:
         :param exist_user: typically the admin user in eXist
         :param exist_pw: the password of the exist_user
         """
-        tmpl = Templates(self.exist_server.cfgs)
+        tmpl = Templates(self.build_cfg)
         new_file = tmpl.new_file("xql", "uninstall_app.xqlt", {"app_name": xar_name})
         print blue("Uninstalling %s on the server" % xar_name)        
         std_out = self.exist_server.execute_file(new_file, exist_user, exist_pw)         
         return std_out
 
     def is_valid(self, xar_path):
+        """
+        Check if the XAR package is a valid file
+        """
         import zipfile
         xar_file = zipfile.ZipFile(xar_path)
         file_name = os.path.basename(xar_path)
@@ -329,7 +340,7 @@ class XarPackage:
 
     def deploy(self, xar_path):
         """
-        
+        deploys the xar package onto the eXist server
         """
         xar_file_name = os.path.basename(xar_path)
         xar_valid = self.is_valid(xar_path)
@@ -358,14 +369,14 @@ class Templates:
     templates_folder_name = "templates"
     runtime_folder_name = "runtime"
 
-    def __init__(self, cfgs):
-        self.cfgs = cfgs
+    def __init__(self, build_cfg):
+        self.build_cfg = build_cfg
         self.template_folder = os.path.join(
-            self.cfgs.fab_path(), 
+            self.build_cfg.fab_path(), 
             self.templates_folder_name
         )
         self.runtime_folder = os.path.join(
-            self.cfgs.fab_path(),
+            self.build_cfg.fab_path(),
             self.runtime_folder_name
         )
         print blue(" Template folder set to : %s" % self.template_folder)
@@ -432,10 +443,28 @@ class Daemon:
     Additionally service status can be queried via systemctl
     """
 
-    daemons = ["httpd", "eXist-st", "eXist-be", "jetty-dev01"]
-    
     def __init__(self):
-        self.cfgs = GawatiConfigs()
+
+        self.setup_cfg = GawatiConfigs()
+
+        def sections_which_are_daemons():
+            """
+            Sections which are type = install are considered to be 
+            daemon sections 
+            """
+            sections = self.setup_cfg.gcr.config.sections()
+            daemon_sections = []
+            for section in sections:
+                if (self.setup_cfg.gcr.config.has_option(section, "type")):
+                    type_val = self.setup_cfg.gcr.config.get(section, "type") 
+                    if (type_val == "install"):
+                        daemon_sections.append(section)
+            return daemon_sections
+        
+        """ 
+        Get daemon service names
+        """
+        self.daemons = sections_which_are_daemons()
 
         
     def start(self, service):
