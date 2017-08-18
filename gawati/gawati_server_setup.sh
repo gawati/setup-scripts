@@ -167,6 +167,7 @@ source "${LIBRARY}"
 
 set_environment_java
 
+vardebug INSTALLS
 for INSTANCE in ${INSTALLS} ; do
   [ "${INSTANCE}" = "" ] && bail_out 1 "Installer instance name empty."
   vardebug INSTANCE
