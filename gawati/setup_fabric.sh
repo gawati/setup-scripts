@@ -27,4 +27,4 @@ virtualenv $FABVENV
 # want to mess with the system python
 $FABPIP install fabric
 echo "cd $FABSRC && .$FAB \$*" > ./fab && chmod ug+x ./fab
-
+echo "./fab -H localhost \$*" > ./fl && chmod ug+x ./fl

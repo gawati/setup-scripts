@@ -1,4 +1,4 @@
-from fabric.api import run
+from fabric.api import run, env
 import gawati
 """
 This module is the entry point to all fabric actions.
@@ -43,6 +43,7 @@ def checkout():
 
     ghub = gawati.GitHubSource()
     ghub.checkout()
+
 
 def build():
     """
@@ -143,3 +144,11 @@ def _prompt_user_pass():
     _user = getpass("Enter user name:")
     _pass = getpass("Enter password:")
     return {'user': _user, 'password': _pass}
+
+def environment():
+    """
+    Prints the fabric environment variables for debug purposes
+    """
+    import json
+    print json.dumps(env, sort_keys=True, indent=4)
+
