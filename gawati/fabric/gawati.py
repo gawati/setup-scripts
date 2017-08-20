@@ -1,3 +1,12 @@
+"""
+.. module:: gawati
+    :platform: Linux
+    :synopsis: This module has the core functionality used by the fabric deployment scripts of Gawati
+
+.. moduleauthor:: Ashok Hariharan
+
+"""
+
 from __future__ import with_statement
 import os, sys
 from fabric import state
@@ -6,15 +15,6 @@ from fabric.colors import red, green, blue
 from fabric.contrib.files import exists
 from ConfigParser import SafeConfigParser
 
-"""
-.. module:: gawati
-    :platform: Linux
-    :synopsis: This module has the core functionality used by the fabric deployment
-scripts of Gawati
-
-.. moduleauthor:: Ashok Hariharan
-
-"""
 
 
 class GawatiConfigReader:
