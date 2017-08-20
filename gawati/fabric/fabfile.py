@@ -1,6 +1,12 @@
 from fabric.api import run, env
 import gawati
 """
+.. module:: fabfile
+    :platform: Linux
+    :synopsis: Module that defines all the fabric actions
+
+.. moduleauthor:: Ashok Hariharan
+
 This module is the entry point to all fabric actions.
 You can run:
     
