@@ -89,7 +89,6 @@ SSLfilePath="${SSLdir}/${siteURLnodot}"
   acme_tiny --account-key "${SSLdir}/account.key" --csr "${SSLfilePath}.csr" --acme-dir /var/www/challenges > "${SSLfilePath}.crt" && {
     chcon -u system_u "${SSLfilePath}.crt"
     cat "${SSLdir}/chain.pem" "${SSLfilePath}.crt" "${SSLfilePath}.key" > "${SSLfilePath}.pem"
-    openssl pkcs12 -export -out "${SSLfilePath}.pfx" -inkey "${SSLfilePath}.key" -in "${SSLfilePath}.crt"
     }
   [ "`wc -c ${SSLfilePath}.crt | cut -d ' ' -f 1`" = "0" ] && rm "${SSLfilePath}.crt"
   }
