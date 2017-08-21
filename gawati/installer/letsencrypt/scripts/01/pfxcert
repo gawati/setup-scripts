@@ -1,0 +1,36 @@
+#!/bin/bash
+
+true && {
+  exec 5> /tmp/debug.txt
+  BASH_XTRACEFD="5"
+  PS4='$LINENO: '
+  set -x
+  }
+
+
+[ "${1}" != "" ] && siteURL="${1}" || {
+  echo 'pfxcert <siteURL>'
+  echo
+  echo 'Example: acme_setup "www.mydomain.tld"'
+  exit
+  }
+
+siteURLnodot="$(echo ${siteURL} | tr '.' '_')"
+SSLdir="/etc/ssl/letsencrypt"
+
+SSLfilePath="${SSLdir}/${siteURLnodot}"
+
+[ -f "${SSLfilePath}.key" ] || {
+  echo "Private key ${SSLfilePath}.key missing."
+  exit 1
+  }
+
+[ -f "${SSLfilePath}.crt" ] || {
+  echo "Certificate ${SSLfilePath}.crt missing."
+  exit 1
+  }
+
+pushd "${SSLdir}" >/dev/null
+openssl pkcs12 -export -out "${SSLfilePath}.pfx" -inkey "${SSLfilePath}.key" -in "${SSLfilePath}.crt" && echo "Please find your pfx certificate at ${SSLfilePath}.pfx"
+popd >/dev/null
+
