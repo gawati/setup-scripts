@@ -71,14 +71,21 @@ function install {
 
   DST=/usr/local/bin/acme_setup
   [ -e "${DST}" ] || {
-    cat "${SRCFOLDER}/ssl-cert-check" > "${DST}"
+    cat "${SRCFOLDER}/acme_setup" > "${DST}"
     chcon -u system_u "${DST}"
     chmod 755 "${DST}"
     }
 
   DST=/usr/local/bin/acme_renew
   [ -e "${DST}" ] || {
-    cat "${SRCFOLDER}/ssl-cert-check" > "${DST}"
+    cat "${SRCFOLDER}/acme_renew" > "${DST}"
+    chcon -u system_u "${DST}"
+    chmod 755 "${DST}"
+    }
+
+  DST=/usr/local/bin/pfxcert
+  [ -e "${DST}" ] || {
+    cat "${SRCFOLDER}/pfxcert" > "${DST}"
     chcon -u system_u "${DST}"
     chmod 755 "${DST}"
     }
