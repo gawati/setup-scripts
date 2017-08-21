@@ -1,44 +1,66 @@
-from fabric.api import run, env
-import gawati
 """
-This module is the entry point to all fabric actions.
-You can run:
-    
-    ./fab -H localhost --list
- 
-To see a list of available actions.
+.. module:: fabfile
+    :platform: Linux
+    :synopsis: Module that defines all the fabric actions
 
-Actions can be run across multiple hosts: 
+.. moduleauthor:: Ashok Hariharan
+
+This module provides command line actions to checkout source code, build it and deploy it onto 
+application servers. This is implemented using `fabric <http://www.fabfile.org/>`_.  The scripts
+can be run on the local computer, or on a remote computer by specifying a different host in fabric.
+
+To view a list of available actions, run, which will return at the end a list of available commands::
+    
+    $./fab -H localhost --list
+
+    Available commands:
+
+        build                 Build checked out code; expects 'checkout' to have been run
+        checkout              Checkout code for all configured packages from Github
+        deploy_exist_modules  Deploys all built eXist modules from  ./src
+        environment           Prints the fabric environment variables for debug purposes
+        install_xar           Uninstalls the XAR package from the eXist server
+        remove_xar            Uninstalls the XAR package from the eXist server
+        start                 Starts the specified services
+        stop                  Stops the specified service
+
+ 
+Actions can be run across multiple hosts, by specifying the `-H` parameter with a comma separated list
+of hosts followed by the action name(s)::
 
     ./fab -H localhost,anotherhost <action-name>
 
-If you are always running actions on localhost, there is a short-form:
+If you are always running actions on localhost, there is a short-form::
 
     ./fl <action-name>
 
-Actions can take parameters:
+Multiple actions can be run together, for example, the following will checkout the source from github,
+build it and deploy it to the application servers::
+
+    ./fl checkout build deploy_exist_modules
+
+Some actions take parameters, the below starts the specific named eXist service. The name is the name set 
+in the section of the installed service in `dev.ini`::
 
     ./fl start:eXist-st
 
-Here eXist-st is the parameter to the start action.
-
-You can pass multiple parameters by separating them with a comma.
-
-Actions need to be run with sudo:
+You can pass multiple parameters by separating them with a comma. Some actions need to be run with sudo, if they 
+require sudo privileges::
 
     sudo ./fl <action-name>
 
-as configuration information is read from dev.ini which is in the root home
-folder (typically).
+
 """
 
-
+from fabric.api import run, env
+import gawati
 
 
 def checkout():
     """
-    Checkout code for all configured packages from Github
-    Packages are picked up in the order listed in the [git_repos] section
+    Checkout code for all configured packages from Github.  Packages are 
+    picked up in the order listed in the [git_repos] section. Source code
+    is checked out into the `src` folder.
     """
 
     ghub = gawati.GitHubSource()
@@ -47,7 +69,7 @@ def checkout():
 
 def build():
     """
-    Build checked out code; expects 'checkout' to have been run 
+    Build checked out code; NOTE: expects 'checkout' to have been run 
     """
 
     ghub = gawati.GitHubSource()
