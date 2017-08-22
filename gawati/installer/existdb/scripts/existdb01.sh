@@ -21,17 +21,22 @@ function install {
     return
     }
 
+
   OSinstall xmlstarlet 1
+
+  export adminPasswd="`< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c10`"
+  setvars EXIST_HOME EXIST_DATA EXIST_PORT EXIST_SPORT adminPasswd
 
   message 1 "Installing to folder >${INSTANCE_FOLDER}< as user >${RUNAS_USER}<."
 
-  sudo -u "${RUNAS_USER}" bash -s "${INSTANCE}" "${EXIST_HOME}" "${INSTALLSRC}" "${EXIST_PORT}" "${EXIST_SPORT}" "${EXIST_DATA}" <<'EndOfScriptAsRUNAS_USER'
+  sudo -u "${RUNAS_USER}" bash -s "${INSTANCE}" "${EXIST_HOME}" "${INSTALLSRC}" "${EXIST_PORT}" "${EXIST_SPORT}" "${EXIST_DATA}" "${adminPasswd}" <<'EndOfScriptAsRUNAS_USER'
     export INSTANCE="${1}"
     export EXIST_HOME="${2}"
     export INSTALLSRC="${3}"
     export EXIST_PORT="${4}"
     export EXIST_SPORT="${5}"
     export EXIST_DATA="${6}"
+    export adminPasswd="${7}"
 
     function set_jettyxml_property {
       PROPERTY="${1}"
@@ -83,7 +88,6 @@ function install {
     echo "dataDir=${EXIST_DATA}" >> existdb.options
     echo "MAX_MEMORY=2048" >> existdb.options
     echo "cacheSize=256" >> existdb.options
-    export adminPasswd="`< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c10`"
     java -jar "${INSTALLSRC}" -options existdb.options
     sed -i "s%^.*wrapper.app.account=.*$%wrapper.app.account=${USER}%" "${EXIST_HOME}/tools/yajsw/conf/wrapper.conf"
     bin/client.sh --no-gui --local --user admin --xpath "xmldb:change-user('admin','${adminPasswd}','dba','/db')" >/dev/null

@@ -8,6 +8,30 @@ function set_environment_java {
   . ~/.javarc
   }
 
+function setvar {
+  localvar="`echo ${INSTANCE}_${1} | tr '.-' '_'`"
+  declare -g "${localvar}"="${2}"
+  vardebug ${localvar}
+  }
+
+function setvars {
+  for item in $*; do
+    setvar "${item}" "${!item}"
+    done
+  }
+
+function getvar {
+  localvar="`echo ${INSTANCE}_${1} | tr '.-' '_'`"
+  return "${!localvar}"
+  }
+
+function orginfo_init {
+  declare -g ORG="`iniget options organisation`"
+  declare -g COUNTRY="`iniget options country`"
+  declare -g STATE="`iniget options state`"
+  declare -g CITY="`iniget options city`"
+  vardebug ORG COUNTRY STATE CITY
+  }
 
 function installer_init {
   declare -g INSTANCE="${1}"
@@ -29,6 +53,8 @@ function installer_init {
   vardebug INSTANCE_PATH
   declare -g OPTIONS="`crudini --get \"${INIFILE}\" \"${INSTANCE}\" options`"
   vardebug OPTIONS
+
+  setvars VERSION OUTFILE SRCURL INSTALLER_NAME INSTALLER_HOME INSTALLSRC RUNAS_USER INSTANCE_FOLDER INSTANCE_PATH OPTIONS
 
   [ "${OUTFILE}" = "" ] || [ -f "${INSTALLSRC}" ] || {
     download "${INSTALLSRC}" "${SRCURL}" || bail_out 2 "Failed to download >${OUTFILE}< from >${URL}<."
