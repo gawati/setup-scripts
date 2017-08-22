@@ -4,13 +4,14 @@ function install {
   VERSION="${2}"
   installer_init "${1}" "" ""
 
+  orginfo_init
   CERTS="`iniget \"${INSTANCE}\" certs`"
 
   for CERT in ${CERTS} ; do
     CERT_="`echo ${CERT} | tr '.' '_'`"
     vardebug CERT CERT_
-    [ -e "/etc/pki/tls/private/${CERT_}.key" ] || {
-      openssl req -x509 -nodes -days 365 -subj "/C=CH/ST=Zug/L=Zug/CN=${CERT}" -newkey rsa:2048 -keyout "/etc/pki/tls/private/${CERT_}.key" -out "/etc/pki/tls/certs/${CERT_}.crt"
+    [ -e "/etc/pki/tls/private/${CERT_}.key" -o -h "/etc/pki/tls/private/${CERT_}.key" ] || {
+      openssl req -x509 -nodes -days 365 -subj "/C=${COUNTRY}/ST=${STATE}/L=${CITY}/CN=${CERT}" -newkey rsa:2048 -keyout "/etc/pki/tls/private/${CERT_}.key" -out "/etc/pki/tls/certs/${CERT_}.crt"
       }
     done
 
