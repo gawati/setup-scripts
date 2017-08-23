@@ -84,11 +84,7 @@ MYPID=$$
 STAMP="`timestamp`"
 TARGET="${1:-dev}"
 
-OSinstall sudo 1
 OSinstall wget 1
-OSinstall epel-release 1
-OSinstall crudini 1
-OSinstall subversion 1
 
 INIFILE="${HOME}/${TARGET}.ini"
 vardebug INIFILE
@@ -105,6 +101,11 @@ vardebug INIFILE
   message 2 "Then rerun ${0} to install."
   exit 0
   }
+
+OSinstall sudo 1
+OSinstall epel-release 1
+OSinstall crudini 1
+OSinstall subversion 1
 
 [ -f "${INIFILE}" ] || bail_out 1 "No installation template file at >${INIFILE}<."
 message 1 "Reading installation instructions from >${INIFILE}<."
