@@ -21,6 +21,8 @@ function install {
   vardebug CFGSRC
 
   cfgdeploy "10-loswap.conf 10-noipv6.conf" "/etc/sysctl.d" "${CFGSRC}"
+  [ -f "/etc/sysctl.d/10-loswap.conf" ] && chcon -t system_conf_t "/etc/sysctl.d/10-loswap.conf"
+  [ -f "/etc/sysctl.d/10-noipv6.conf" ] && chcon -t system_conf_t "/etc/sysctl.d/10-noipv6.conf"
 
   OSinstall yum-cron 1
   systemctl enable yum-cron
