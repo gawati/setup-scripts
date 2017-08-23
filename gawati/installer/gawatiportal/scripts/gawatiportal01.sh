@@ -12,6 +12,8 @@ function install {
   export GAWATI_URL_ROOT_="`echo ${GAWATI_URL_ROOT} | tr . _`"
   export EXIST_BE_URL="`iniget \"${INSTANCE}\" EXIST_BE_URL`"
 
+  addtohosts "${MainIP}" "${GAWATI_URL_ROOT}"
+
   for FILE in ${CFGFILES} ; do
     cfgwrite "${CFGSRC}/${FILE}" "${CFGDST}"
     done
