@@ -4,7 +4,6 @@ function install {
   VERSION="${2}"
   installer_init "${1}" "" ""
   
-  CFGFILES="10-gawati.conf"
   CFGSRC="${INSTALLER_HOME}/01"
   CFGDST="/etc/httpd/conf.d"
 
@@ -14,9 +13,7 @@ function install {
 
   addtohosts "${MainIP}" "${GAWATI_URL_ROOT}"
 
-  for FILE in ${CFGFILES} ; do
-    cfgwrite "${CFGSRC}/${FILE}" "${CFGDST}"
-    done
+  cfgwrite "${CFGSRC}/10-gawati.conf" "${CFGDST}" "10-${GAWATI_URL_ROOT}.conf"
 
   DSTOBJ="/var/www/html/${GAWATI_URL_ROOT}"
   [ -e "${DSTOBJ}" ] || {
