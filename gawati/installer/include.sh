@@ -30,7 +30,9 @@ function orginfo_init {
   declare -g COUNTRY="`iniget options country`"
   declare -g STATE="`iniget options state`"
   declare -g CITY="`iniget options city`"
-  vardebug ORG COUNTRY STATE CITY
+  declare -g ORGMAIL="`iniget options orgmail`"
+  export ORG COUNTRY STATE CITY ORGMAIL
+  vardebug ORG COUNTRY STATE CITY ORGMAIL
   }
 
 function installer_init {
@@ -54,6 +56,7 @@ function installer_init {
   declare -g OPTIONS="`crudini --get \"${INIFILE}\" \"${INSTANCE}\" options`"
   vardebug OPTIONS
 
+  export INSTANCE VERSION OUTFILE SRCURL INSTALLER_NAME INSTALLER_HOME INSTALLSRC RUNAS_USER INSTANCE_FOLDER INSTANCE_PATH OPTIONS
   setvars VERSION OUTFILE SRCURL INSTALLER_NAME INSTALLER_HOME INSTALLSRC RUNAS_USER INSTANCE_FOLDER INSTANCE_PATH OPTIONS
 
   [ "${OUTFILE}" = "" ] || [ -f "${INSTALLSRC}" ] || {
