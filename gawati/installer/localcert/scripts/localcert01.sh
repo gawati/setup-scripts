@@ -4,18 +4,49 @@ function install {
   VERSION="${2}"
   installer_init "${1}" "" ""
 
+  CFGFOLDER="${INSTALLER_HOME}/01"
+
   orginfo_init
   CERTS="`iniget \"${INSTANCE}\" certs`"
+  PCD=/etc/pki/CA
+  PTD=/etc/pki/tls
+  export PCD PTD
+  vardebug PCD PTD
 
+  NEWCA=FALSE
+  [ -e "${PCD}/newcerts/ca.conf" ] || {
+    cfgwrite "${CFGFOLDER}/ca.conf" "${PCD}/newcerts"
+    NEWCA=TRUE
+    }
+
+  [ -e "${PCD}/private/cacert.pem" ] || openssl req -x509 -batch -config "${PCD}/newcerts/ca.conf" -newkey rsa:4096 -sha256 -nodes -out "${PCD}/private/cacert.pem" -outform PEM
+
+  [ "${NEWCA}" = "TRUE" ] && cat "${CFGFOLDER}/caextension.conf" | envsubst >> "${PCD}/newcerts/ca.conf"
+
+  pushd "${PCD}/newcerts" >/dev/null
+  [ -e "index.txt" ] || touch "index.txt"
+  [ -e "serial.txt" ] || echo "01" > "serial.txt"
+  
   for CERT in ${CERTS} ; do
     CERT_="`echo ${CERT} | tr '.' '_'`"
+    export CERT CERT_
     vardebug CERT CERT_
-    [ -e "/etc/pki/tls/private/${CERT_}.key" -o -h "/etc/pki/tls/private/${CERT_}.key" ] || {
-      openssl req -x509 -nodes -days 365 -subj "/C=${COUNTRY}/ST=${STATE}/L=${CITY}/CN=${CERT}" -newkey rsa:2048 -keyout "/etc/pki/tls/private/${CERT_}.key" -out "/etc/pki/tls/certs/${CERT_}.crt"
-      }
-    done
+    export CERTMAIL="postmaster@`echo ${CERT} | cut -d '.' -f 2-`"
 
-  pushd /etc/pki/tls/certs >/dev/null
+    [ -e "${PTD}/${CERT_}.conf" ] || cfgwrite "${CFGFOLDER}/server.conf" "${PTD}" "${CERT_}.conf"
+
+    [ -e "${PTD}/private/${CERT_}.key" -o -h "${PTD}/private/${CERT_}.key" ] || {
+      openssl req -batch -config "${PTD}/${CERT_}.conf" -newkey rsa:2048 -sha256 -nodes -out "${PTD}/${CERT_}.csr" -outform PEM
+      }
+
+    [ -e "${PTD}/certs/${CERT_}.crt" -o -h "${PTD}/certs/${CERT_}.crt" ] || {
+      openssl ca -batch -config "${PCD}/newcerts/ca.conf" -policy signing_policy -extensions signing_req -out "${PTD}/certs/${CERT_}.crt" -infiles "${PTD}/${CERT_}.csr"
+      }
+
+    done
+  popd >/dev/null
+
+  pushd "${PTD}/certs" >/dev/null
   [ -e "chain.pem" ] || ln -s /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem chain.pem
   popd >/dev/null
   }
