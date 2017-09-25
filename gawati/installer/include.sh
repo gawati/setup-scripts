@@ -32,6 +32,12 @@ function addsummary {
   SUMMARY+="${1}"$'\n'
   }
 
+function ensureuser {
+  NEWUSER="${1}"
+  [ "${NEWUSER}" = "" ] && return
+  grep "^${NEWUSER}:.*" /etc/passwd >/dev/null || useradd "${NEWUSER}" || bail_out 1 "Failed to add missing user >${NEWUSER}<."
+  }
+
 function orginfo_init {
   declare -g ORG="`iniget options organisation`"
   declare -g COUNTRY="`iniget options country`"
@@ -54,7 +60,7 @@ function installer_init {
   declare -g RUNAS_USER="`iniget \"${INSTANCE}\" user`"
   [ "${RUNAS_USER}" = "" ] && declare -g RUNAS_USER="`whoami`"
   vardebug RUNAS_USER
-  grep "^${RUNAS_USER}:.*" /etc/passwd >/dev/null || useradd "${RUNAS_USER}" || bail_out 1 "Failed to add missing user >${RUNAS_USER}<."
+  ensureuser "${RUNAS_USER}"
 
   declare -g INSTANCE_FOLDER="`iniget \"${INSTANCE}\" instanceFolder`"
   vardebug INSTANCE_FOLDER

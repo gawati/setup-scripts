@@ -50,6 +50,8 @@ function install {
   BUILDUSER="`iniget \"${INSTANCE}\" builduser`"
   export BEPWD STPWD BUILDUSER
 
+  ensureuser "${BUILDUSER}"
+
   [ "${BEPWD}" = "" ] && {
     echo "Please provide the administrator password for eXist instance >${XSTBE}<."
     read BEPWD
