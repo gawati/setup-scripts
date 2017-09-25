@@ -83,6 +83,7 @@ function OSinstall {
 MYPID=$$
 STAMP="`timestamp`"
 TARGET="${1:-dev}"
+export TARGET
 
 OSinstall wget 1
 
@@ -174,6 +175,8 @@ source "${LIBRARY}"
 
 set_environment_java
 
+SUMMARY=''
+
 vardebug INSTALLS
 for INSTANCE in ${INSTALLS} ; do
   [ "${INSTANCE}" = "" ] && bail_out 1 "Installer instance name empty."
@@ -205,4 +208,6 @@ for INSTANCE in ${INSTALLS} ; do
     postinstall
     done
   done
+
+echo "${SUMMARY}"
 
