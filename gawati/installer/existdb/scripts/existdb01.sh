@@ -27,6 +27,8 @@ function install {
   export adminPasswd="`< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c10`"
   setvars EXIST_HOME EXIST_DATA EXIST_PORT EXIST_SPORT adminPasswd
 
+  addsummary "Admin Password of existDB instance ${INSTANCE}: >${adminPasswd}<"
+
   message 1 "Installing to folder >${INSTANCE_FOLDER}< as user >${RUNAS_USER}<."
 
   sudo -u "${RUNAS_USER}" bash -s "${INSTANCE}" "${EXIST_HOME}" "${INSTALLSRC}" "${EXIST_PORT}" "${EXIST_SPORT}" "${EXIST_DATA}" "${adminPasswd}" <<'EndOfScriptAsRUNAS_USER'

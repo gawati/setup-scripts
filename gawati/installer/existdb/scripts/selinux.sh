@@ -1,6 +1,6 @@
 OSinstall policycoreutils-devel 1
 
-postinstall {
+function postinstall {
 
   for THISPORT in "${EXIST_PORT}" "${EXIST_SPORT}" ; do
     SEPORT="`sepolicy network -p ${THISPORT} | grep -v 'unreserved_port_t' | grep ' tcp ' | cut -d ' ' -f 3`"
@@ -11,12 +11,12 @@ postinstall {
     return
     done
 
-  seinfo -t${INSTANCE}_t && message 1 "SElinux policy named >${INSTANCE}_t< already exists. Skipping." || {
+  seinfo -t${INSTANCE}_t >/dev/null && message 1 "SElinux policy named >${INSTANCE}_t< already exists. Skipping." || {
     MYTEMPDIR="/tmp/$$.`timestamp`"
     mkdir -p "${MYTEMPDIR}"
     pushd "${MYTEMPDIR}" >/dev/null
     sepolicy generate --init -n "${INSTANCE}" "${INSTANCE_PATH}/tools/yajsw/wrapper.jar"
-    echo "type "${INSTANCE}_port_t;" >> "${INSTANCE}.te"
+    echo "type ${INSTANCE}_port_t;" >> "${INSTANCE}.te"
     echo "corenet_port(${INSTANCE}_port_t)" >> "${INSTANCE}.te"
     ./${INSTANCE}.sh
     popd >/dev/null
