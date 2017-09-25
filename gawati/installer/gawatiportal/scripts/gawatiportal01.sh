@@ -28,5 +28,39 @@ function install {
     chmod 770 "${DSTOBJ}"
     }
 
+  OSinstall python-virtualenv
+
+  pushd "${DOWNLOADFOLDER}" >/dev/null
+  [ -d "gawati" ] &&  {
+    cd gawati
+    svn update >/dev/null
+    message 1 "Updated gawati installers..."
+    } ||  {
+    message 1 "Fetching gawati installers..."
+    svn checkout "https://github.com/gawati/setup-scripts.git/trunk/gawati/fabric" gawati >/dev/null
+    }
+  popd >/dev/null
+
+  XSTBE="`iniget \"${INSTANCE}\" existbe`"
+  XSTST="`iniget \"${INSTANCE}\" existst`"
+
+  BEPWD="`getvar adminPasswd ${XSTBE}`"
+  STPWD="`getvar adminPasswd ${XSTST}`"
+
+  BUILDUSER="`iniget \"${INSTANCE}\" builduser`"
+  export BEPWD STPWD BUILDUSER
+
+  [ "${BEPWD}" = "" ] && {
+    echo "Please provide the administrator password for eXist instance >${XSTBE}<."
+    read BEPWD
+    }
+
+  [ "${STPWD}" = "" ] && {
+    echo "Please provide the administrator password for eXist instance >${XSTST}<."
+    read STPWD
+    }
+
+  cat "${CFGSRC}/deployment.ini" | envsubst | "${DOWNLOADFOLDER}/gawati/setup_fabric.sh"
+
   }
 
