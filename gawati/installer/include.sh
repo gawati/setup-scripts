@@ -10,7 +10,7 @@ function set_environment_java {
 
 function setvar {
   localvar="`echo ${INSTANCE}_${1} | tr '.-' '_'`"
-  declare -g "${localvar}"="${2}"
+  declare -r -g "${localvar}"="${2}"
   vardebug ${localvar}
   }
 
@@ -21,8 +21,15 @@ function setvars {
   }
 
 function getvar {
-  localvar="`echo ${INSTANCE}_${1} | tr '.-' '_'`"
-  return "${!localvar}"
+  VARIABLENAME="${1}"
+  FORINSTANCE="${2}"
+  [ "${FORINSTANCE}" = "" ] && FORINSTANCE="${INSTANCE}"
+  localvar="`echo ${FORINSTANCE}_${VARIABLENAME} | tr '.-' '_'`"
+  echo "${!localvar}"
+  }
+
+function addsummary {
+  SUMMARY+="${1}"$'\n'
   }
 
 function orginfo_init {
