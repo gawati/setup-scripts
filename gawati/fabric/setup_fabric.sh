@@ -21,7 +21,7 @@ FABSRC=.
 #pip install virtualenv
 
 # install the fabric virtual python
-virtualenv $FABVENV
+virtualenv ../$FABVENV
 
 # install fabric in the virtual env, we dont
 # want to mess with the system python
