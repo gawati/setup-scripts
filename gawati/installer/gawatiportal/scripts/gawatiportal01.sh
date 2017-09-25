@@ -52,6 +52,26 @@ function install {
 
   ensureuser "${BUILDUSER}"
 
+  [ -f ~/.ssh/id_rsa.pub ] || {
+    message 3 "The installer needs to provide the root user with ssh access to the builduser by using ssh keys."
+    bail_out "Please store your public key as ~/.ssh/id_rsa.pub"
+    }
+
+  sudo -u "${BUILDUSER}" MYKEY="`bash -c 'cat ~/.ssh/id_rsa.pub'`" bash -s "" <<'EndOfScriptAsRUNAS_USER'
+  [ -d ~/.ssh ] || {
+    mkdir ~/.ssh
+    chmod 700 ~/.ssh
+    }
+
+  [ -f ~/.ssh/authorized_keys ] || {
+    touch ~/.ssh/authorized_keys
+    chmod 600 ~/.ssh/authorized_keys
+    }
+
+  grep "${MYKEY}" ~/.ssh/authorized_keys >/dev/null || echo "${MYKEY}" >>~/.ssh/authorized_keys
+EndOfScriptAsRUNAS_USER
+
+
   [ "${BEPWD}" = "" ] && {
     echo "Please provide the administrator password for eXist instance >${XSTBE}<."
     read BEPWD
