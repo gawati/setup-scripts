@@ -28,7 +28,7 @@ function install {
     chmod 770 "${DSTOBJ}"
     }
 
-  OSinstall python-virtualenv
+  OSinstall fabric
 
   pushd "${DOWNLOADFOLDER}" >/dev/null
   [ -d "gawati" ] &&  {
