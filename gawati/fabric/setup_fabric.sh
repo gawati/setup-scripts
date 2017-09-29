@@ -4,14 +4,18 @@
 #
 #!/bin/bash
 
+FABSTDIN=`cat`
 # name of the python virtual-env for fabric
-FABVENV=venv_fabric
+#FABVENV=venv_fabric
 
 # python pip and fab relative paths
-FABPY=../$FABVENV/bin/python
-FABPIP=../$FABVENV/bin/pip
-FAB=../$FABVENV/bin/fab
-FABSRC=.
+#FABPY=../$FABVENV/bin/python
+#FABPIP=../$FABVENV/bin/pip
+#FAB=../$FABVENV/bin/fab
+FABSRC=./fabric
+
+echo $FABSTDIN > ".dep.ini"
+
 
 # install pip
 #curl -z  -"get-pip.py"  "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
@@ -21,10 +25,11 @@ FABSRC=.
 #pip install virtualenv
 
 # install the fabric virtual python
-virtualenv ../$FABVENV
+#virtualenv ../$FABVENV
 
 # install fabric in the virtual env, we dont
 # want to mess with the system python
-$FABPIP install fabric
-echo "cd $FABSRC && $FAB \$*" > ../fab && chmod ug+x ../fab
+#$FABPIP install fabric
+
+echo "cd $FABSRC && fab \$*" > ../fab && chmod ug+x ../fab
 echo "./fab -H localhost \$*" > ../fl && chmod ug+x ../fl
