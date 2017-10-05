@@ -1,0 +1,20 @@
+gen_tunable(${INSTANCE}_can_connect_all, false) 
+gen_tunable(httpd_can_connect_${INSTANCE}, true) 
+
+type ${INSTANCE}_port_t; 
+corenet_port(${INSTANCE}_port_t) 
+
+allow ${INSTANCE}_t ${INSTANCE}_port_t:tcp_socket name_bind; 
+allow ${INSTANCE}_t self:tcp_socket create_stream_socket_perms; 
+corenet_tcp_connect_${INSTANCE}_port(${INSTANCE}_t) 
+
+tunable_policy(`${INSTANCE}_can_connect_all',` 
+	corenet_tcp_connect_all_ports(${INSTANCE}_t) 
+') 
+
+optional_policy(` 
+	tunable_policy(`httpd_can_connect_${INSTANCE}',` 
+		corenet_tcp_connect_${INSTANCE}_port(httpd_t) 
+	') 
+') 
+
