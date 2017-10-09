@@ -1,6 +1,7 @@
 OSinstall policycoreutils-devel 1
 
 function postinstall {
+  CFGSRC="${INSTALLER_HOME}/01"
 
   for THISPORT in "${EXIST_PORT}" "${EXIST_SPORT}" ; do
     SEPORT="`sepolicy network -p ${THISPORT} | grep -v 'unreserved_port_t' | grep ' tcp ' | cut -d ' ' -f 3`"
@@ -16,9 +17,8 @@ function postinstall {
     mkdir -p "${MYTEMPDIR}"
     pushd "${MYTEMPDIR}" >/dev/null
     sepolicy generate --init -n "${INSTANCE}" "${INSTANCE_PATH}/tools/yajsw/wrapper.jar"
-    echo "type ${INSTANCE}_port_t;" >> "${INSTANCE}.te"
-    echo "corenet_port(${INSTANCE}_port_t)" >> "${INSTANCE}.te"
-    ./${INSTANCE}.sh
+    cat "${CFGSRC}/exist.te" | envsubst  >> "${INSTANCE}.te"
+    pwd; echo "./${INSTANCE}.sh"
     popd >/dev/null
     }
 

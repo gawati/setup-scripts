@@ -28,6 +28,7 @@ function install {
     chmod 770 "${DSTOBJ}"
     }
 
+  false && {
   OSinstall fabric
 
   pushd "${DOWNLOADFOLDER}" >/dev/null
@@ -52,9 +53,13 @@ function install {
 
   ensureuser "${BUILDUSER}"
 
-  [ -f ~/.ssh/id_rsa.pub ] || {
-    message 3 "The installer needs to provide the root user with ssh access to the builduser by using ssh keys."
-    bail_out "Please store your public key as ~/.ssh/id_rsa.pub"
+  [ -e ~/.ssh/id_rsa.pub ] || {
+    [ -e ~/.ssh/id_rsa ] || {
+      ssh-keygen -f "${HOME}/.ssh/id_rsa" -t rsa -N ''
+      } || {
+      message 3 "The installer needs to provide the root user with ssh access to the builduser by using ssh keys."
+      bail_out "Please store your public key as ~/.ssh/id_rsa.pub"
+      }
     }
 
   sudo -u "${BUILDUSER}" MYKEY="`bash -c 'cat ~/.ssh/id_rsa.pub'`" bash -s "" <<'EndOfScriptAsRUNAS_USER'
@@ -83,6 +88,7 @@ EndOfScriptAsRUNAS_USER
     }
 
   cat "${CFGSRC}/deployment.ini" | envsubst | "${DOWNLOADFOLDER}/gawati/setup_fabric.sh"
+  }
 
   }
 

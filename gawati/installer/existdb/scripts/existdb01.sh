@@ -16,16 +16,17 @@ function install {
   EXIST_SPORT="`iniget \"${INSTANCE}\" sslport`"
   vardebug EXIST_SPORT
 
+  setvars EXIST_HOME EXIST_DATA EXIST_PORT EXIST_SPORT
+
   [ -e "${EXIST_HOME}" ] && {
     echo -e "\033[0;32mDestination >${EXIST_HOME}< for >${INSTANCE}< already existing. Skipping.<\033[0m"
     return
     }
 
-
   OSinstall xmlstarlet 1
 
   export adminPasswd="`< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c10`"
-  setvars EXIST_HOME EXIST_DATA EXIST_PORT EXIST_SPORT adminPasswd
+  setvars adminPasswd
 
   addsummary "Admin Password of existDB instance ${INSTANCE}: >${adminPasswd}<"
 
@@ -94,7 +95,6 @@ function install {
     sed -i "s%^.*wrapper.app.account=.*$%wrapper.app.account=${USER}%" "${EXIST_HOME}/tools/yajsw/conf/wrapper.conf"
     bin/client.sh --no-gui --local --user admin --xpath "xmldb:change-user('admin','${adminPasswd}','dba','/db')" >/dev/null
     echo -e "\033[0;32mYour eXistDB instance >${INSTANCE}< has admin password: >${adminPasswd}<\033[0m"
-    #read -n 1 -s -r -p 'Take note of this password for user "admin". Press any key to continue.'
     set_yajsm_property wrapper.ntservice.name "${INSTANCE}" wrapper
     cd "${JETTY_HOME}/etc"
     set_jettyxml_property jetty.port "${EXIST_PORT}"
@@ -113,6 +113,30 @@ EndOfScriptAsRUNAS_USER
       chcon -u system_u "/etc/init.d/${INSTANCE}"
       chkconfig --add "${INSTANCE}"
       chkconfig "${INSTANCE}" on
+      }
+
+    message 1 "Waiting for service >${INSTANCE}< to come up."
+    systemctl start "${INSTANCE}" 
+    timeout 20s grep -q "Service ${INSTANCE} started" <(tail -n 5 -f /var/log/messages) && {
+      message 1 ">${INSTANCE}< started as service."
+      } || {
+      message 3 ">${INSTANCE}< failed to start as service."
+      }
+
+    maxwait=20
+    i=0
+    message 4 "Waiting up to ${maxwait} seconds for >${INSTANCE}< to start answering requests."
+    until curl -s -o /dev/null -w '%{http_code}' "http://localhost:${EXIST_PORT}"; do
+      message 4 "${i}.. "
+      ((i++))
+      [ $i -gt ${maxwait} ] && break
+      sleep 1
+      done
+
+    [ $i -gt ${maxwait} ] && {
+      bail_out ">${INSTANCE}< fails to service requests."
+      } || {
+      message 1 ">${INSTANCE}< responds to requests."
       }
     }
   }
