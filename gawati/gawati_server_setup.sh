@@ -138,33 +138,34 @@ popd >/dev/null
 
 
 TASKS="`crudini --get \"${INIFILE}\" | grep -v options`"
+vardebug TASKS
 
-INSTALLS=""
-for TASK in ${TASKS} ; do
-  vardebug TASK
-  TYPE="`iniget "${TASK}" type`"
-  vardebug TYPE
-  [ "${TYPE}" = "install" ] && {
-    [ "${INSTALLS}" = "" ] || INSTALLS+=" "
-    INSTALLS+="${TASK}"
-    }
-  done
+#INSTALLS=""
+#for TASK in ${TASKS} ; do
+  #vardebug TASK
+  #TYPE="`iniget "${TASK}" type`"
+  #vardebug TYPE
+  #[ "${TYPE}" = "install" ] && {
+    #[ "${INSTALLS}" = "" ] || INSTALLS+=" "
+    #INSTALLS+="${TASK}"
+    #}
+  #done
 
-arrdebug RESOURCES
+#arrdebug RESOURCES
 
-pushd "${DOWNLOADFOLDER}" >/dev/null || bail_out 1 "Failed to enter folder >${DOWNLOADFOLDER}<."
+#pushd "${DOWNLOADFOLDER}" >/dev/null || bail_out 1 "Failed to enter folder >${DOWNLOADFOLDER}<."
 
-for RESOURCE in ${RESOURCES} ; do
-  vardebug RESOURCE
-  OUTFILE="`echo ${$RESOURCE} | cut -d ' ' -f 1`"
-  URL="`echo ${RESOURCE} | cut -d ' ' -f 2-`"
-  vardebug OUTFILE URL
-  [ -f "${OUTFILE}" ] || {
-    download "${OUTFILE}" "${URL}" || bail_out 2 "Failed to download >${OUTFILE}< for resource >${RESOURCE}< from >${URL}<."
-    }
-  done
+#for RESOURCE in ${RESOURCES} ; do
+  #vardebug RESOURCE
+  #OUTFILE="`echo ${$RESOURCE} | cut -d ' ' -f 1`"
+  #URL="`echo ${RESOURCE} | cut -d ' ' -f 2-`"
+  #vardebug OUTFILE URL
+  #[ -f "${OUTFILE}" ] || {
+    #download "${OUTFILE}" "${URL}" || bail_out 2 "Failed to download >${OUTFILE}< for resource >${RESOURCE}< from >${URL}<."
+    #}
+  #done
 
-popd >/dev/null
+#popd >/dev/null
 
 
 # Installer section
@@ -177,10 +178,12 @@ set_environment_java
 
 SUMMARY=''
 
-vardebug INSTALLS
-for INSTANCE in ${INSTALLS} ; do
+#vardebug INSTALLS
+#for INSTANCE in ${INSTALLS} ; do
+for INSTANCE in ${TASKS} ; do
   [ "${INSTANCE}" = "" ] && bail_out 1 "Installer instance name empty."
   vardebug INSTANCE
+  unset readconfig
   unset install
   INSTALLER_NAME="`iniget \"${INSTANCE}\" installer`"
   vardebug INSTALLER_NAME
@@ -190,6 +193,16 @@ for INSTANCE in ${INSTALLS} ; do
   vardebug INSTALLER_FILE
   [ -f "${INSTALLER_FILE}" ] || bail_out 1 "No installer available for >${INSTANCE}< at >${INSTALLER_FILE}<."
   . "${INSTALLER_FILE}"
+
+  [ "`type -t readconfig`" != function ] && message 4 "No readconfig function defined." 2
+  [ "`type -t readconfig`" = function ] && {
+    message 4 "Calling readconfig in >${INSTALLER_FILE}<." 2
+    readconfig "${INSTANCE}" "${VERSION}"
+    }
+
+  TYPE="`iniget "${INSTANCE}" type`"
+  [ "${TYPE}" != "install" ] && continue
+  
   [ "`type -t install`" != function ] && bail_out 1 "No installer function defined."
   message 4 "Calling installer in >${INSTALLER_FILE}<." 2
   install "${INSTANCE}" "${VERSION}"
