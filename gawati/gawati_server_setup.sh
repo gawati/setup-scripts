@@ -80,6 +80,7 @@ function OSinstall {
   message 1 "Installed package >${PACKAGE}<."
   }
 
+
 MYPID=$$
 STAMP="`timestamp`"
 TARGET="${1:-dev}"
@@ -140,35 +141,6 @@ popd >/dev/null
 TASKS="`crudini --get \"${INIFILE}\" | grep -v options`"
 vardebug TASKS
 
-#INSTALLS=""
-#for TASK in ${TASKS} ; do
-  #vardebug TASK
-  #TYPE="`iniget "${TASK}" type`"
-  #vardebug TYPE
-  #[ "${TYPE}" = "install" ] && {
-    #[ "${INSTALLS}" = "" ] || INSTALLS+=" "
-    #INSTALLS+="${TASK}"
-    #}
-  #done
-
-#arrdebug RESOURCES
-
-#pushd "${DOWNLOADFOLDER}" >/dev/null || bail_out 1 "Failed to enter folder >${DOWNLOADFOLDER}<."
-
-#for RESOURCE in ${RESOURCES} ; do
-  #vardebug RESOURCE
-  #OUTFILE="`echo ${$RESOURCE} | cut -d ' ' -f 1`"
-  #URL="`echo ${RESOURCE} | cut -d ' ' -f 2-`"
-  #vardebug OUTFILE URL
-  #[ -f "${OUTFILE}" ] || {
-    #download "${OUTFILE}" "${URL}" || bail_out 2 "Failed to download >${OUTFILE}< for resource >${RESOURCE}< from >${URL}<."
-    #}
-  #done
-
-#popd >/dev/null
-
-
-# Installer section
 
 LIBRARY="${DOWNLOADFOLDER}/installer/include.sh"
 [ -f "${LIBRARY}" ] || bail_out 2 "Installer library missing in repository at >${LIBRARY}<."
@@ -178,8 +150,6 @@ set_environment_java
 
 SUMMARY=''
 
-#vardebug INSTALLS
-#for INSTANCE in ${INSTALLS} ; do
 for INSTANCE in ${TASKS} ; do
   [ "${INSTANCE}" = "" ] && bail_out 1 "Installer instance name empty."
   vardebug INSTANCE
@@ -201,7 +171,10 @@ for INSTANCE in ${TASKS} ; do
     }
 
   TYPE="`iniget "${INSTANCE}" type`"
-  [ "${TYPE}" != "install" ] && continue
+  [ "${TYPE}" != "install" ] && {
+    message 4 ">${INSTANCE}< not configured for installation. Skipping."
+    continue
+    }
   
   [ "`type -t install`" != function ] && bail_out 1 "No installer function defined."
   message 4 "Calling installer in >${INSTALLER_FILE}<." 2
