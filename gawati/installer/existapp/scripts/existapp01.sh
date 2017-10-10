@@ -18,9 +18,9 @@ function install {
     setvar adminPasswd "${EXISTPWD}"
     }
 
-  QUERY="repo:install-and-deploy('http://localhost${EXIST_PATH}','${SOURCE_URL}')"
-  POST="<query xmlns='http://exist.sourceforge.net/NS/exist'><text><![CDATA[${QUERY}]]></text></query>"
 
+  QUERY="repo:install-and-deploy('http://localhost/${INSTANCE}','${SOURCE_URL}')"
+  POST="<query xmlns='http://exist.sourceforge.net/NS/exist'><text><![CDATA[${QUERY}]]></text></query>"
   vardebug SOURCE_URL EXIST_INSTANCE EXIST_PATH TEMP_XML PORT EXISTPWD POST
 
   RESPONSE="`curl -s -H "Content-Type: text/xml" -u "admin:${EXISTPWD}" -o "${TEMP_XML}" -w "%{http_code}" -d "${POST}" "http://localhost:${PORT}/exist/rest/db"`"
