@@ -9,8 +9,11 @@ function set_environment_java {
   }
 
 function setvar {
-  localvar="`echo ${INSTANCE}_${1} | tr '.-' '_'`"
-  declare -r -g "${localvar}"="${2}"
+  VARIABLENAME="${1}"
+  VALUE="${2}"
+  FORINSTANCE="${3:-${INSTANCE}}"
+  localvar="`echo ${FORINSTANCE}_${1} | tr '.-' '_'`"
+  declare -g "${localvar}"="${VALUE}"
   vardebug ${localvar}
   }
 
@@ -154,3 +157,13 @@ function addtohosts {
   [ -f /tmp/hosts.tmp ] && rm -f /tmp/hosts.tmp
   }
 
+
+function askifempty {
+  VARNAME="${1}"
+  USERTEXT="${2}"
+
+  [ "${!VARNAME}" = "" ] && {
+    echo "${USERTEXT}"
+    read "${VARNAME}"
+    }
+  }

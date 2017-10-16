@@ -41,10 +41,15 @@ function install {
 
   vardebug SHOSTNAME DNSdomain MainIP
 
-
   hostnamectl --static set-hostname "${SHOSTNAME}"
-
   addtohosts "${MainIP}" "${SHOSTNAME}.${DNSdomain} ${SHOSTNAME}"
+
+  [ -e ~/.ssh/id_rsa.pub ] || {
+    [ -e ~/.ssh/id_rsa ] || {
+      message 1 "No SSH identitiy found. Creating id_rsa SSH keys..."
+      ssh-keygen -f "${HOME}/.ssh/id_rsa" -t rsa -N ''
+      }
+    }
 
   }
 

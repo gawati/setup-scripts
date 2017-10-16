@@ -1,24 +1,21 @@
 #!/bin/bash
 
 function readconfig {
-  EXIST_PORT="`iniget \"${INSTANCE}\" port`"
-  EXIST_SPORT="`iniget \"${INSTANCE}\" sslport`"
-  setvars EXIST_PORT EXIST_SPORT
-  }
-
-
-function install {
   VERSION="${2}"
   installer_init "${1}" "eXist-db-setup-${VERSION}.jar" "https://bintray.com/existdb/releases/download_file?file_path=eXist-db-setup-${VERSION}.jar"
-
 
   EXIST_HOME="${INSTANCE_PATH}"
   EXIST_DATA="`iniget \"${INSTANCE}\" dataFolder`"
   EXIST_DATA="`echo eval echo ${EXIST_DATA} | sudo -u \"${RUNAS_USER}\" bash -s`" || bail_out 1 "Failed to determine data folder for >${INSTANCE}<."
+
+  EXIST_PORT="`iniget \"${INSTANCE}\" port`"
+  EXIST_SPORT="`iniget \"${INSTANCE}\" sslport`"
   vardebug EXIST_HOME EXIST_DATA EXIST_PORT EXIST_SPORT
+  setvars EXIST_HOME EXIST_DATA EXIST_PORT EXIST_SPORT
+  }
 
-  setvars EXIST_HOME EXIST_DATA
 
+function install {
   [ -e "${EXIST_HOME}" ] && {
     echo -e "\033[0;32mDestination >${EXIST_HOME}< for >${INSTANCE}< already existing. Skipping.<\033[0m"
     return

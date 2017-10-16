@@ -11,12 +11,8 @@ function install {
   PORT="`getvar EXIST_PORT ${EXIST_INSTANCE}`"
   EXISTPWD="`getvar adminPasswd ${EXIST_INSTANCE}`"
 
-  [ "${EXISTPWD}" = "" ] && {
-    echo "Please provide the administrator password for eXist instance >${EXIST_INSTANCE}<."
-    read EXISTPWD
-    INSTANCE="${EXIST_INSTANCE}"
-    setvar adminPasswd "${EXISTPWD}"
-    }
+  askifempty EXISTPWD "Please provide the administrator password for eXist instance >${EXIST_INSTANCE}<."
+  setvar adminPasswd "${EXISTPWD}" "${EXIST_INSTANCE}"
 
   vardebug SOURCE_URL EXIST_INSTANCE EXIST_PATH PORT EXISTPWD EXIST_APPNAME
 

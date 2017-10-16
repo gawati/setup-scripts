@@ -11,7 +11,7 @@ function install {
 
   export GAWATI_URL_ROOT="`iniget \"${INSTANCE}\" GAWATI_URL_ROOT`"
   export GAWATI_URL_ROOT_="`echo ${GAWATI_URL_ROOT} | tr . _`"
-  export EXIST_BE_URL="`iniget \"${INSTANCE}\" EXIST_BE_URL`"
+  export EXIST_ST_URL="`iniget \"${INSTANCE}\" EXIST_ST_URL`"
 
   addtohosts "${MainIP}" "${GAWATI_URL_ROOT}"
 
@@ -39,43 +39,30 @@ function install {
   OSinstall unzip
 
   [ -f "${DOWNLOADFOLDER}/${ZIPFILE}" ] || bail_out "Template package not available at >${DOWNLOADFOLDER}/${ZIPFILE}<"
-  unzip "${DOWNLOADFOLDER}/${ZIPFILE}" -d "${GWTEMPLATES}"
+  unzip -q "${DOWNLOADFOLDER}/${ZIPFILE}" -d "${GWTEMPLATES}"
   [ -d "${GWTEMPLATES}/themes" ] || bail_out "Failed to deploy themes."
   chown -R root:apache "${GWTEMPLATES}/themes"
 
+  STIMPORT="`iniget \"${INSTANCE}\" importFolder`"
 
-  #--------------------
+  [ -d "${STIMPORT}" ] && {
+    XSTST="`iniget \"${INSTANCE}\" existst`"
 
-  false && {
-  XSTBE="`iniget \"${INSTANCE}\" existbe`"
-  XSTST="`iniget \"${INSTANCE}\" existst`"
+    STUSER="`getvar RUNAS_USER ${XSTST}`"
+    STHOME="`getvar EXIST_HOME ${XSTST}`"
+    STPORT="`getvar EXIST_PORT ${XSTST}`"
+    STPWD="`getvar adminPasswd ${XSTST}`"
 
-  BEPWD="`getvar adminPasswd ${XSTBE}`"
-  STPWD="`getvar adminPasswd ${XSTST}`"
+    askifempty STPWD "Please provide the administrator password for eXist instance >${XSTST}<."
+    setvar adminPasswd "${STPWD}" "${XSTST}"
 
-  [ -e ~/.ssh/id_rsa.pub ] || {
-    [ -e ~/.ssh/id_rsa ] || {
-      ssh-keygen -f "${HOME}/.ssh/id_rsa" -t rsa -N ''
-      } || {
-      message 3 "The installer needs to provide the root user with ssh access to the builduser by using ssh keys."
-      bail_out "Please store your public key as ~/.ssh/id_rsa.pub"
-      }
+    STDATAPWD="`${STHOME}/bin/client.sh -ouri=xmldb:exist://localhost:${STPORT}/exist/xmlrpc -u admin -P """${STPWD}""" -x """data(doc('/db/apps/gw-data/_auth/_pw.xml')/users/user[@name = 'gwdata']/@pw)""" 2>/dev/null | tail -1`"
+
+    vardebug XSTST STIMPORT STUSER STHOME STPORT STPWD STDATAPWD
+
+    message 1 "Importing Data into exist instance >${XSTST}<. This can take a while."
+    RESULT="`${STHOME}/bin/client.sh -ouri=xmldb:exist://localhost:${STPORT}/exist/xmlrpc -u gwdata -P """${STDATAPWD}""" -d -m /db/apps/gw-data/akn -p """${STIMPORT}""" 2>/dev/null | tail -1`"
+    message 1 "${RESULT}"
     }
-
-  sudo -u "${BUILDUSER}" MYKEY="`bash -c 'cat ~/.ssh/id_rsa.pub'`" bash -s "" <<'EndOfScriptAsRUNAS_USER'
-  [ -d ~/.ssh ] || {
-    mkdir ~/.ssh
-    chmod 700 ~/.ssh
-    }
-
-  [ -f ~/.ssh/authorized_keys ] || {
-    touch ~/.ssh/authorized_keys
-    chmod 600 ~/.ssh/authorized_keys
-    }
-
-  grep "${MYKEY}" ~/.ssh/authorized_keys >/dev/null || echo "${MYKEY}" >>~/.ssh/authorized_keys
-EndOfScriptAsRUNAS_USER
-  }
-
   }
 
