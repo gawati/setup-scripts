@@ -1,0 +1,33 @@
+#!/bin/bash
+
+DOCPATH="$1"
+DOCTYPE="$2"
+NALTYPE="$3"
+
+TEMPDIR="/tmp"
+
+for TYPE in "${DOCTYPE}" "${NALTYPE}" ; do
+  find "${DOCPATH}" -name "*.${TYPE}" | sed 's%^\(.*\)....$%\1%g' | sort -u > "${TEMPDIR}/${TYPE}.txt"
+  done
+
+
+comm -23 "${TEMPDIR}/${DOCTYPE}.txt" "${TEMPDIR}/${NALTYPE}.txt" > "${TEMPDIR}/lonely${DOCTYPE}.txt"
+comm -13 "${TEMPDIR}/${DOCTYPE}.txt" "${TEMPDIR}/${NALTYPE}.txt" > "${TEMPDIR}/lonely${NALTYPE}.txt"
+
+rm "${TEMPDIR}/${DOCTYPE}.txt"
+rm "${TEMPDIR}/${NALTYPE}.txt"
+
+
+for FILE in `cat "${TEMPDIR}/lonely${NALTYPE}.txt"`; do
+  echo "Removing lonely ${FILE}.${NALTYPE}"
+  rm "${FILE}.${NALTYPE}"
+  done
+rm "${TEMPDIR}/lonely${NALTYPE}.txt"
+
+
+for FILE in `cat "${TEMPDIR}/lonely${DOCTYPE}.txt"`; do
+  echo "Creating thumbnail for ${FILE}.${DOCTYPE}"
+  convert -thumbnail x80 "${FILE}.${DOCTYPE}[0]" "${FILE}.png"
+  done
+rm "${TEMPDIR}/lonely${DOCTYPE}.txt"
+
