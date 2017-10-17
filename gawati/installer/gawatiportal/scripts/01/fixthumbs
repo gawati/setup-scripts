@@ -3,6 +3,18 @@
 DOCPATH="$1"
 DOCTYPE="$2"
 NALTYPE="$3"
+NALHGHT="${4:-600}"
+
+[ "$1" = "" -o "$2" = "" -o "$3" = "" ] && {
+  echo "fixthumbs <Document root> <Document type/file extension> <Thumbnail type/file extension> <Nail height in px, 600 default>"
+  exit
+  }
+
+
+[ -d "${DOCPATH}" ] || 
+  echo "no directory at >${DOCPATH}<"
+  exit
+  }
 
 TEMPDIR="/tmp"
 
@@ -27,7 +39,7 @@ rm "${TEMPDIR}/lonely${NALTYPE}.txt"
 
 for FILE in `cat "${TEMPDIR}/lonely${DOCTYPE}.txt"`; do
   echo "Creating thumbnail for ${FILE}.${DOCTYPE}"
-  convert -thumbnail x600 "${FILE}.${DOCTYPE}[0]" "${FILE}.png"
+  convert -thumbnail "x${NALHGHT}" "${FILE}.${DOCTYPE}[0]" "${FILE}.png"
   done
 rm "${TEMPDIR}/lonely${DOCTYPE}.txt"
 
