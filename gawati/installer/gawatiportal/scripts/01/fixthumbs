@@ -27,7 +27,7 @@ rm "${TEMPDIR}/lonely${NALTYPE}.txt"
 
 for FILE in `cat "${TEMPDIR}/lonely${DOCTYPE}.txt"`; do
   echo "Creating thumbnail for ${FILE}.${DOCTYPE}"
-  convert -thumbnail x80 "${FILE}.${DOCTYPE}[0]" "${FILE}.png"
+  convert -thumbnail x600 "${FILE}.${DOCTYPE}[0]" "${FILE}.png"
   done
 rm "${TEMPDIR}/lonely${DOCTYPE}.txt"
 
