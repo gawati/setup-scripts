@@ -11,7 +11,7 @@ NALHGHT="${4:-600}"
   }
 
 
-[ -d "${DOCPATH}" ] || 
+[ -d "${DOCPATH}" ] || {
   echo "no directory at >${DOCPATH}<"
   exit
   }
