@@ -1,12 +1,14 @@
 OSinstall gettext 1
 OSinstall iproute 1
 
+
 function set_environment_java {
   echo 'JAVA_HOME="`readlink -f /usr/bin/java | sed "s:/bin/java::"`"' >~/.javarc
   echo 'export JAVA_HOME' >>~/.javarc
   grep '\.javarc' ~/.bash_profile >/dev/null || { echo >>~/.bash_profile ; echo '[ -f ~/.javarc ] && . ~/.javarc' >>~/.bash_profile ; }
   . ~/.javarc
   }
+
 
 function setvar {
   VARIABLENAME="${1}"
@@ -17,11 +19,13 @@ function setvar {
   vardebug ${localvar}
   }
 
+
 function setvars {
   for item in $*; do
     setvar "${item}" "${!item}"
     done
   }
+
 
 function getvar {
   VARIABLENAME="${1}"
@@ -31,15 +35,18 @@ function getvar {
   echo "${!localvar}"
   }
 
+
 function addsummary {
   SUMMARY+="${1}"$'\n'
   }
+
 
 function ensureuser {
   NEWUSER="${1}"
   [ "${NEWUSER}" = "" ] && return
   grep "^${NEWUSER}:.*" /etc/passwd >/dev/null || useradd "${NEWUSER}" || bail_out 1 "Failed to add missing user >${NEWUSER}<."
   }
+
 
 function orginfo_init {
   declare -g ORG="`iniget options organisation`"
@@ -50,6 +57,7 @@ function orginfo_init {
   export ORG COUNTRY STATE CITY ORGMAIL
   vardebug ORG COUNTRY STATE CITY ORGMAIL
   }
+
 
 function installer_init {
   declare -g INSTANCE="${1}"
@@ -167,3 +175,21 @@ function askifempty {
     read "${VARNAME}"
     }
   }
+
+
+function exist_query {
+  MYPOST="<query xmlns='http://exist.sourceforge.net/NS/exist'><text><![CDATA[`echo -n ${!1} | envsubst`]]></text></query>"
+  MYUSER="${2:-admin}"
+  MYPWD="${3:-${EXIST_PWD}}"
+  MYPORT="${4:-${EXIST_PORT}}"
+  vardebug MYPOST MYUSER MYPWD MYPORT
+  declare -g RESPONSE
+  RESPONSE="`curl -s -H "Content-Type: text/xml" -u "${MYUSER}:${MYPWD}" -w "%{http_code}" -d "${MYPOST}" "http://localhost:${MYPORT}/exist/rest/db"`"
+  vardebug RESPONSE
+  }
+
+EXIST_DO_REPO_LIST='repo:list()'
+EXIST_DO_REPO_UNDEPLOY='repo:undeploy("${EXIST_APPNAME}")'
+EXIST_DO_REPO_REMOVE='repo:remove("${EXIST_APPNAME}")'
+EXIST_DO_REPO_INSTALL='repo:install-and-deploy("${EXIST_APPNAME}","${SOURCE_URL}")'
+
