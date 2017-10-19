@@ -23,23 +23,35 @@ for TYPE in "${DOCTYPE}" "${NALTYPE}" ; do
   done
 
 
-comm -23 "${TEMPDIR}/${DOCTYPE}.txt" "${TEMPDIR}/${NALTYPE}.txt" > "${TEMPDIR}/lonely${DOCTYPE}.txt"
-comm -13 "${TEMPDIR}/${DOCTYPE}.txt" "${TEMPDIR}/${NALTYPE}.txt" > "${TEMPDIR}/lonely${NALTYPE}.txt"
+find "${DOCPATH}" -name "*.${DOCTYPE}" | sort -u > "${TEMPDIR}/${DOCTYPE}.txt"
+SEDSTR="s%^\(.*/\)\(.*\)\.${DOCTYPE}\$%\1th_\2%g"
+cat  "${TEMPDIR}/${DOCTYPE}.txt" | sed "${SEDSTR}" | sort -u > "${TEMPDIR}/projected.txt"
 
-rm "${TEMPDIR}/${DOCTYPE}.txt"
-rm "${TEMPDIR}/${NALTYPE}.txt"
+SEDSTR="s%^\(.*\)\.${NALTYPE}\$%\1%g"
+find "${DOCPATH}" -name "*.${NALTYPE}" | sed "${SEDSTR}" | sort -u > "${TEMPDIR}/${NALTYPE}.txt"
 
+comm -23 "${TEMPDIR}/projected.txt" "${TEMPDIR}/${NALTYPE}.txt" | sed 's%^\(.*\)/th_\(.*\)$%\1/\2%g' > "${TEMPDIR}/lonely${DOCTYPE}.txt"
+comm -13 "${TEMPDIR}/projected.txt" "${TEMPDIR}/${NALTYPE}.txt" > "${TEMPDIR}/lonely${NALTYPE}.txt"
 
+#rm "${TEMPDIR}/${DOCTYPE}.txt"
+#rm "${TEMPDIR}/${NALTYPE}.txt"
+#rm "${TEMPDIR}/projected.txt"
+
+NRPNG="`cat "${TEMPDIR}/lonely${NALTYPE}.txt" | wc -l`"
+echo "Found ${NRPNG} thumbnails without matching document."
 for FILE in `cat "${TEMPDIR}/lonely${NALTYPE}.txt"`; do
   echo "Removing lonely ${FILE}.${NALTYPE}"
   rm "${FILE}.${NALTYPE}"
   done
-rm "${TEMPDIR}/lonely${NALTYPE}.txt"
+#rm "${TEMPDIR}/lonely${NALTYPE}.txt"
 
 
+NRPDF="`cat "${TEMPDIR}/lonely${DOCTYPE}.txt" | wc -l`"
+echo "Found ${NRPDF} documents without matching thumbnail."
 for FILE in `cat "${TEMPDIR}/lonely${DOCTYPE}.txt"`; do
+  THUMB="`echo ${FILE} | sed 's%^\(.*/\)\(.*\)$%\1th_\2%g'`"
   echo "Creating thumbnail for ${FILE}.${DOCTYPE}"
-  convert -thumbnail "x${NALHGHT}" "${FILE}.${DOCTYPE}[0]" "${FILE}.png"
+  convert -thumbnail "x${NALHGHT}" "${FILE}.${DOCTYPE}[0]" "${THUMB}.${NALTYPE}"
   done
-rm "${TEMPDIR}/lonely${DOCTYPE}.txt"
+#rm "${TEMPDIR}/lonely${DOCTYPE}.txt"
 
