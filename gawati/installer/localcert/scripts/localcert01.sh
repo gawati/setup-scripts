@@ -19,7 +19,10 @@ function install {
     NEWCA=TRUE
     }
 
-  [ -e "${PCD}/private/cacert.pem" ] || openssl req -x509 -batch -config "${PCD}/newcerts/ca.conf" -newkey rsa:4096 -sha256 -nodes -out "${PCD}/private/cacert.pem" -outform PEM
+  [ -e "${PCD}/private/cacert.pem" ] || {
+    openssl req -x509 -batch -config "${PCD}/newcerts/ca.conf" -newkey rsa:4096 -sha256 -nodes -out "${PCD}/private/cacert.pem" -outform PEM
+    openssl x509 -in "${PCD}/private/cacert.pem" -out "${PCD}/certs/ca.crt"
+    }
 
   [ "${NEWCA}" = "TRUE" ] && cat "${CFGFOLDER}/caextension.conf" | envsubst >> "${PCD}/newcerts/ca.conf"
 
