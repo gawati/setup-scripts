@@ -114,7 +114,7 @@ EndOfScriptAsRUNAS_USER
       }
 
     message 1 "Waiting for service >${INSTANCE}< to come up."
-    systemctl start "${INSTANCE}" 
+    systemctl restart "${INSTANCE}" 
     timeout 20s grep -q "Service ${INSTANCE} started" <(tail -n 5 -f /var/log/messages) && {
       message 1 ">${INSTANCE}< started as service."
       } || {

@@ -16,7 +16,7 @@ function install {
   chcon -u system_u /var/log/fail2ban.log
 
   systemctl enable fail2ban || message 3 "Failed to enable fail2ban service"
-  systemctl start fail2ban || message 3 "Failed to start fail2ban service"
+  systemctl restart fail2ban || message 3 "Failed to start fail2ban service"
 
   FILE="/usr/local/bin/offenders"
   [ -e "${FILE}" ] || {
