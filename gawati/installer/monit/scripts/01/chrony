@@ -1,0 +1,6 @@
+check process ntpd with pidfile /var/run/chronyd.pid
+	group system
+	start program = "/usr/bin/systemctl start chronyd" with timeout 60 seconds
+	stop program  = "/usr/bin/systemctl stop chronyd" with timeout 30 seconds
+	if failed host 127.0.0.1 port 323 type udp then alert
+

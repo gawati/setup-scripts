@@ -1,0 +1,3 @@
+set pidfile /var/run/monit.pid
+set idfile /var/lib/monit/.monit.id
+set statefile /var/lib/monit/.monit.state

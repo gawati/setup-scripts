@@ -1,0 +1,14 @@
+check process apache with pidfile /var/run/httpd/httpd.pid
+	group application
+	start program = "/usr/bin/systemctl start httpd" with timeout 60 seconds
+	stop program  = "/usr/bin/systemctl stop httpd" with timeout 30 seconds
+	if cpu > 80% for 2 cycles then alert
+	if cpu > 60% for 3 cycles then alert
+	if cpu > 90% for 4 cycles then alert
+	if children > 50 for 2 cycles then alert
+	if children > 250 for 2 cycles then restart
+	if totalmem > 2560 MB for 3 cycles then alert
+	if totalmem > 3072 MB for 5 cycles then alert
+	if loadavg(5min) greater than 10 for 8 cycles then alert
+	if failed port 80 protocol http and request "/monit_token" then restart
+	if 3 restarts within 5 cycles then timeout

@@ -1,0 +1,8 @@
+check system ${HOSTNAME}
+	if memory usage > 90% then alert
+	if cpu usage > 90% for 3 cycles then alert
+	if cpu usage (user) > 80% for 3 cycles then alert
+	if cpu usage (system) > 60% for 3 cycles then alert
+	if cpu usage (wait) > 80% for 3 cycles then alert
+	if swap usage > 60% for 3 cycles then alert
+
