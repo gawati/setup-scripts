@@ -1,4 +1,4 @@
-check process apache with pidfile /var/run/wrapper.eXist-st.pid
+check process eXist-st with pidfile /var/run/wrapper.eXist-st.pid
 	group application
 	start program = "/usr/bin/systemctl start eXist-st" with timeout 60 seconds
 	stop program  = "/usr/bin/systemctl stop eXist-st" with timeout 30 seconds
