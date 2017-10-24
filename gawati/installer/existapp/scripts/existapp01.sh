@@ -19,15 +19,6 @@ function install {
   export EXIST_APPNAME
   export SOURCE_URL
 
-  EXIST_DO_LIST='<query xmlns="http://exist.sourceforge.net/NS/exist"><text><![CDATA[repo:list()]]></text></query>'
-  EXIST_DO_UNDEPLOY='<query xmlns="http://exist.sourceforge.net/NS/exist"><text><![CDATA[repo:undeploy("${EXIST_APPNAME}")]]></text></query>'
-  EXIST_DO_REMOVE='<query xmlns="http://exist.sourceforge.net/NS/exist"><text><![CDATA[repo:remove("${EXIST_APPNAME}")]]></text></query>'
-  EXIST_DO_INSTALL='<query xmlns="http://exist.sourceforge.net/NS/exist"><text><![CDATA[repo:install-and-deploy("${EXIST_APPNAME}","${SOURCE_URL}")]]></text></query>'
-
-  #exist_query "`echo ${EXIST_DO_LIST} | envsubst`"
-  #EXIST_APPS="`echo "${RESPONSE}" | grep 'exist:value' | sed 's%.*<exist:value exist:type="xs:string">\(.*\)</exist:value>%\1%g'`"
-  #vardebug EXIST_APPS
-
   exist_query EXIST_DO_REPO_LIST
   EXIST_APPS="`echo "${RESPONSE}" | grep 'exist:value' | sed 's%.*<exist:value exist:type="xs:string">\(.*\)</exist:value>%\1%g'`"
   vardebug EXIST_APPS
