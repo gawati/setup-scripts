@@ -19,8 +19,11 @@ function install {
   chmod 600 /etc/monitrc
 
   for FILE in `echo ${MODULES} | tr ',' ' '`; do
-    [ -e "/etc/monit.d/${FILE}" ] || cfgwrite "${SRCFOLDER}/${FILE}" "/etc/monit.d"
-    chmod 600 "/etc/monit.d/${FILE}"
+    [ -e "/etc/monit.d/${FILE}" ] || {
+      cfgwrite "${SRCFOLDER}/${FILE}" "/etc/monit.d"
+      chmod 600 "/etc/monit.d/${FILE}"
+      [ "${FILE}" = "webinterface" ] && addsummary "Admin Password for user >admin< on monit webinterface: >${MONITPWD}<"
+      }
     done
 
   FSCONFIG="/etc/monit.d/filesystems"
@@ -34,8 +37,6 @@ function install {
       echo "" >> "${FSCONFIG}"
       done
     }
-
-  addsummary "Admin Password for user >admin< on monit webinterface: >${MONITPWD}<"
 
   systemctl enable monit
   systemctl restart monit
