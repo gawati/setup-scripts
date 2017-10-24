@@ -8,5 +8,5 @@ check process eXist-st with pidfile /var/run/wrapper.eXist-st.pid
 	if totalmem > 80% for 3 cycles then alert
 	if totalmem > 90% for 5 cycles then alert
 	if loadavg(5min) greater than 10 for 8 cycles then alert
-	if failed port 10083 protocol http and request "/exist/apps/gawati-portal/" then restart
+	if failed port 10083 protocol http and request "/exist/apps/gawati-portal/index.html" then restart
 	if 3 restarts within 5 cycles then timeout
