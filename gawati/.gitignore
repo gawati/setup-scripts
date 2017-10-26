@@ -3,3 +3,4 @@
 venv_fabric
 src
 fab
+*.*~
