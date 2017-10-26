@@ -6,6 +6,15 @@ function install {
   OSinstall acme-tiny 1
 
   SRCFOLDER="${INSTALLER_HOME}/01"
+  ANCH="/etc/pki/ca-trust/source/anchors"
+  SSLF="/etc/ssl/letsencrypt"
+
+  [ -d "${ANCH}" ] && {
+    pushd "${ANCH}" >/dev/null
+    [ -e "${ANCH}/isrgrootx1.pem" ] || curl -o isrgrootx1.pem "https://letsencrypt.org/certs/isrgrootx1.pem.txt" && update-ca-trust
+    [ -e "${ANCH}/lets-encrypt-x3-cross-signed.pem" ] || curl -o lets-encrypt-x3-cross-signed.pem "https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem.txt" && update-ca-trust
+    popd  >/dev/null
+    }
 
   DST=/var/www/challenges/.well-known
   [ -e "${DST}" ] || {
@@ -25,31 +34,30 @@ function install {
     chcon -u system_u "${DST}"
     }
 
-  DST=/etc/ssl/letsencrypt
+  DST="${SSLF}"
   [ -e "${DST}" ] || {
     ln -s /etc/pki/tls/letsencrypt "${DST}"
     chcon -h -u system_u "${DST}"
     }
 
-  DST=/etc/ssl/letsencrypt/identrust.pem
+  DST="${SSLF}/identrust.pem"
   [ -e "${DST}" ] || {
     cat "${SRCFOLDER}/identrust.pem" > "${DST}"
     chcon -u system_u "${DST}"
     }
 
-  DST=/etc/ssl/letsencrypt/letsencrypt.pem
+  DST="${SSLF}/letsencrypt.pem"
   [ -e "${DST}" ] || {
-    cat "${DOWNLOADFOLDER}/letsencrypt.pem" > "${DST}"
+    ln -s "${ANCH}/lets-encrypt-x3-cross-signed.pem" "${DST}"
+    }
+
+  DST="${SSLF}/chain.pem"
+  [ -e "${DST}" ] || {
+    cat "${SSLF}/identrust.pem" "${SSLF}/letsencrypt.pem" > "${DST}"
     chcon -u system_u "${DST}"
     }
 
-  DST=/etc/ssl/letsencrypt/chain.pem
-  [ -e "${DST}" ] || {
-    cat /etc/ssl/letsencrypt/identrust.pem /etc/ssl/letsencrypt/letsencrypt.pem > "${DST}"
-    chcon -u system_u "${DST}"
-    }
-
-  DST=/etc/ssl/letsencrypt/account.key
+  DST="${SSLF}/account.key"
   [ -e "${DST}" ] || {
     openssl genpkey -algorithm rsa -pkeyopt rsa_keygen_bits:4096 -out "${DST}"
     chcon -u system_u "${DST}"
