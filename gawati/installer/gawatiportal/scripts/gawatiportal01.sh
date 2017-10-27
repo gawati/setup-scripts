@@ -48,6 +48,7 @@ function install {
   chown -R root:apache "${GWTEMPLATES}/themes"
 
   systemctl restart httpd
+  setsebool httpd_can_network_connect true
 
   FILE="/usr/local/bin/fixthumbs"
   [ -e "${FILE}" ] || {
