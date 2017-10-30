@@ -26,6 +26,11 @@ function install {
 
   [ "${NEWCA}" = "TRUE" ] && cat "${CFGFOLDER}/caextension.conf" | envsubst >> "${PCD}/newcerts/ca.conf"
 
+  ANCH="/etc/pki/ca-trust/source/anchors"
+  [ -d "${ANCH}" ] && {
+    [ -e "${ANCH}/localca.pem" ] || ln -s "${PCD}/certs/ca.crt" "${ANCH}/localca.pem" && update-ca-trust
+    }
+
   pushd "${PCD}/newcerts" >/dev/null
   [ -e "index.txt" ] || touch "index.txt"
   [ -e "serial.txt" ] || echo "01" > "serial.txt"
