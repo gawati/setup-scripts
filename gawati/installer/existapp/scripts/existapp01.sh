@@ -7,14 +7,13 @@ function install {
   EXIST_APPNAME="`iniget \"${INSTANCE}\" appname`"
   SOURCE_URL="`iniget \"${INSTANCE}\" source_url`"
   EXIST_INSTANCE="`iniget \"${INSTANCE}\" exist_instance`"
-  EXIST_PATH="`iniget \"${INSTANCE}\" exist_path`"
   EXIST_PORT="`getvar EXIST_PORT ${EXIST_INSTANCE}`"
   EXIST_PWD="`getvar adminPasswd ${EXIST_INSTANCE}`"
 
   askifempty EXIST_PWD "Please provide the administrator password for eXist instance >${EXIST_INSTANCE}<."
   setvar adminPasswd "${EXIST_PWD}" "${EXIST_INSTANCE}"
 
-  vardebug SOURCE_URL EXIST_INSTANCE EXIST_PATH EXIST_PORT EXIST_PWD EXIST_APPNAME
+  vardebug SOURCE_URL EXIST_INSTANCE EXIST_PORT EXIST_PWD EXIST_APPNAME
 
   export EXIST_APPNAME
   export SOURCE_URL
