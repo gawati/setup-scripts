@@ -57,5 +57,7 @@ function install {
     chmod 755 "${FILE}"
     }
 
+  [ -e "/usr/local/bin/uninstall" ] || ln -s "${DOWNLOADFOLDER}/uninstall.sh" "/usr/local/bin/uninstall"
+
   }
 
