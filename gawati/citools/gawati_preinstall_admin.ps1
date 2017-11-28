@@ -1,15 +1,14 @@
-@"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
-SET PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+
+iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+
+SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
+$Env:PATH="$Env:PATH;$Env:ALLUSERSPROFILE\chocolatey\bin"
 
 choco install kitty 7zip virtualbox -y
 
-setlocal
-:PROMPT
-SET /P AREYOUSURE=Do you want to install developer tools (Y/[N])?
-IF /I "%AREYOUSURE%" NEQ "Y" GOTO END
+$Reply = Read-Host "Do you want to install developer tools (Y/[N])?"
 
-
-
-
-:END
-endlocal
+if ($Reply -eq "y" -or $Reply -eq "Y") {
+  choco install git jdk8 ant visualstudiocode -y
+  }
