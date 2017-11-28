@@ -12,3 +12,5 @@ $Reply = Read-Host "Do you want to install developer tools (Y/[N])?"
 if ($Reply -eq "y" -or $Reply -eq "Y") {
   choco install git jdk8 ant visualstudiocode -y
   }
+
+#TODO edit hosts file: 192.168.56.101  my.gawati.local
