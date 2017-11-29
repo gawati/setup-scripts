@@ -2,7 +2,7 @@ $BOXNAME="Gawati"
 $SNAPNAME=$BOXNAME + "_Snap"
 $TESTNAME=$BOXNAME + "_CITest"
 $GAWATIHOST="my.gawati.local"
-$LOG=$Env:TEMP + "\cisetup_gawati.log"
+$LOG=$Env:TEMP + "\cisetup_gawati_" + (get-date).toString(‘yyyyMMddhhmm’) + ".log"
 
 
 function WaitForVM {
@@ -23,7 +23,7 @@ VBoxManage startvm $TESTNAME --type headless
 
 WaitForVM
 
-kitty -pw MyGawatiLocal -ssh root@my.gawati.local -m gawati_devsetup.sh -log $LOG -send-to-tray 
+kitty -pw MyGawatiLocal -ssh root@my.gawati.local -m scripts\gawati_devsetup.sh -log $LOG -send-to-tray 
 cmd /c start powershell -Command "& { Get-Content -Path $LOG -Wait }"
 
 $XSTSTPWD = Select-String -Path $LOG -Pattern 'Admin Password of existDB instance eXist-st:' -ca | select -exp line
