@@ -1,4 +1,4 @@
-stty onlcr
+stty onlret
 cd
 ip addr show dev eth0
 firewall-cmd --zone=trusted --change-interface=eth0 --permanent
