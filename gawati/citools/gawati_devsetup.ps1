@@ -23,8 +23,9 @@ VBoxManage startvm $TESTNAME --type headless
 
 WaitForVM
 
-kitty -pw MyGawatiLocal -ssh root@my.gawati.local -m scripts\gawati_devsetup.sh -log $LOG -send-to-tray 
-cmd /c start powershell -Command "& { Get-Content -Path $LOG -Wait }"
+kitty -pw MyGawatiLocal -ssh root@my.gawati.local -m scripts\gawati_devsetup.sh -log $LOG
+# -send-to-tray
+#cmd /c start powershell -Command "& { Get-Content -Path $LOG -Wait }"
 
 $XSTSTPWD = Select-String -Path $LOG -Pattern 'Admin Password of existDB instance eXist-st:' -ca | select -exp line
 $MONITPWD = Select-String -Path $LOG -Pattern 'Admin Password for user >admin< on monit webinterface:' -ca | select -exp line
@@ -34,3 +35,5 @@ $MONITPWD = $MONITPWD.Substring(56,10)
 
 #WaitForVM
 #kitty -pw MyGawatiLocal -ssh root@my.gawati.local -L 10443:localhost:10443
+
+pause
