@@ -3,24 +3,24 @@
 $CSV = (New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/gawati/setup-scripts/master/gawati/citools/scripts.csv')
 $Files = $CSV | ConvertFrom-Csv -Delim ','
 
-$DLRoot = $PSScriptRoot + '\scripts\'
-New-Item -ItemType Directory -Force -Path $DLRoot
+$ScriptRoot = $PSScriptRoot + '\scripts\'
+New-Item -ItemType Directory -Force -Path $ScriptRoot
 
 $Files | ForEach {
   $URL = $_.URL
-  $File = $DLRoot + $_.Filename
+  $File = $PSScriptRoot + $_.Filename
   Invoke-WebRequest -Uri "$URL" -OutFile "$File"
   }
 
-$Tasks = "gawati_preinstall_admin.ps1"
+$Tasks = "setup_tools.ps1"
 $Tasks | ForEach {
-  $Script = $DLRoot + $_
+  $Script = $ScriptRoot + $_
   Start-Process "$psHome\powershell.exe" -wait -verb runas -ArgumentList "-noprofile -file ""$Script"""
   }
 
-$Tasks = "gawati_preinstall.ps1", "gawati_devsetup.ps1"
+$Tasks = "deploy_gawati_os.ps1", "gawati_devsetup.ps1"
 $Tasks | ForEach {
-  $Script = $DLRoot + $_
+  $Script = $ScriptRoot + $_
   Start-Process "$psHome\powershell.exe" -wait -ArgumentList "-noprofile -file ""$Script"""
   }
 

@@ -1,5 +1,5 @@
 URL,Filename
-https://raw.githubusercontent.com/gawati/setup-scripts/master/gawati/citools/gawati_devsetup.ps1,gawati_devsetup.ps1
-https://raw.githubusercontent.com/gawati/setup-scripts/master/gawati/citools/gawati_devsetup.sh,gawati_devsetup.sh
-https://raw.githubusercontent.com/gawati/setup-scripts/master/gawati/citools/gawati_preinstall.ps1,gawati_preinstall.ps1
-https://raw.githubusercontent.com/gawati/setup-scripts/master/gawati/citools/gawati_preinstall_admin.ps1,gawati_preinstall_admin.ps1
+https://raw.githubusercontent.com/gawati/setup-scripts/master/gawati/citools/gawati_devsetup.ps1,scripts\gawati_devsetup.ps1
+https://raw.githubusercontent.com/gawati/setup-scripts/master/gawati/citools/gawati_devsetup.sh,scripts\gawati_devsetup.sh
+https://raw.githubusercontent.com/gawati/setup-scripts/master/gawati/citools/deploy_gawati_os.ps1,scripts\deploy_gawati_os.ps1
+https://raw.githubusercontent.com/gawati/setup-scripts/master/gawati/citools/setup_tools.ps1,scripts\setup_tools.ps1
