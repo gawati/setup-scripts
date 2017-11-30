@@ -8,7 +8,7 @@ New-Item -ItemType Directory -Force -Path $ScriptRoot
 
 $Files | ForEach {
   $URL = $_.URL
-  $File = $PSScriptRoot + $_.Filename
+  $File = $PSScriptRoot + '\' + $_.Filename
   Invoke-WebRequest -Uri "$URL" -OutFile "$File"
   }
 
