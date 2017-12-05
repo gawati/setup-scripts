@@ -83,9 +83,11 @@ function installer_init {
   export INSTANCE VERSION OUTFILE SRCURL INSTALLER_NAME INSTALLER_HOME INSTALLSRC RUNAS_USER INSTANCE_FOLDER INSTANCE_PATH OPTIONS
   setvars VERSION OUTFILE SRCURL INSTALLER_NAME INSTALLER_HOME INSTALLSRC RUNAS_USER INSTANCE_FOLDER INSTANCE_PATH OPTIONS
 
-  [ "${OUTFILE}" = "" ] || [ -f "${INSTALLSRC}" ] || {
-    download "${INSTALLSRC}" "${SRCURL}" || bail_out 2 "Failed to download >${OUTFILE}< from >${URL}<."
-    declare -g OUTFILE=""
+  [ "${TYPE}" = "install" ] && {
+    [ "${OUTFILE}" = "" ] || [ -f "${INSTALLSRC}" ] || {
+      download "${INSTALLSRC}" "${SRCURL}" || bail_out 2 "Failed to download >${OUTFILE}< from >${URL}<."
+      declare -g OUTFILE=""
+      }
     }
   }
 
