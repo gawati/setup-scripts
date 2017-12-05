@@ -14,7 +14,7 @@ function install {
 
   OSinstall unzip 1
 
-  GAWATI_URL_ROOT="`getvar GAWATI_URL_ROOT gawatiproxy`"
+  GAWATI_URL_ROOT="`getvar GAWATI_URL_ROOT gawatifrontend`"
   askifempty GAWATI_URL_ROOT "Please provide the full public DNS hostname for your Gawati server."
   WWWROOT="/var/www/html/${GAWATI_URL_ROOT}"
   vardebug GAWATI_URL_ROOT WWWROOT
