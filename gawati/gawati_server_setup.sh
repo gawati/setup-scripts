@@ -152,15 +152,16 @@ SUMMARY=''
 
 for INSTANCE in ${TASKS} ; do
   [ "${INSTANCE}" = "" ] && bail_out 1 "Installer instance name empty."
-  vardebug INSTANCE
+
   unset readconfig
   unset install
+
   INSTALLER_NAME="`iniget \"${INSTANCE}\" installer`"
-  vardebug INSTALLER_NAME
+  TYPE="`iniget "${INSTANCE}" type`"
   VERSION="`iniget \"${INSTANCE}\" version`"
-  vardebug VERSION
   INSTALLER_FILE="${DOWNLOADFOLDER}/installer/${INSTALLER_NAME}/${VERSION}"
-  vardebug INSTALLER_FILE
+  vardebug INSTANCE INSTALLER_NAME TYPE VERSION INSTALLER_FILE
+
   [ -f "${INSTALLER_FILE}" ] || bail_out 1 "No installer available for >${INSTANCE}< at >${INSTALLER_FILE}<."
   . "${INSTALLER_FILE}"
 
@@ -170,7 +171,6 @@ for INSTANCE in ${TASKS} ; do
     readconfig "${INSTANCE}" "${VERSION}"
     }
 
-  TYPE="`iniget "${INSTANCE}" type`"
   [ "${TYPE}" != "install" ] && {
     message 4 ">${INSTANCE}< not configured for installation. Skipping."
     continue
