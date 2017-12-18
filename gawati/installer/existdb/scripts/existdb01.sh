@@ -17,7 +17,7 @@ function readconfig {
 
 function install {
   [ -e "${EXIST_HOME}" ] && {
-    echo -e "\033[0;32mDestination >${EXIST_HOME}< for >${INSTANCE}< already existing. Skipping.<\033[0m"
+    message 2 "Destination >${EXIST_HOME}< for >${INSTANCE}< already existing. Skipping."
     return
     }
 
@@ -31,6 +31,8 @@ function install {
   message 1 "Installing to folder >${INSTANCE_FOLDER}< as user >${RUNAS_USER}<."
 
   sudo -u "${RUNAS_USER}" bash -s "${INSTANCE}" "${EXIST_HOME}" "${INSTALLSRC}" "${EXIST_PORT}" "${EXIST_SPORT}" "${EXIST_DATA}" "${adminPasswd}" <<'EndOfScriptAsRUNAS_USER'
+    echo "Running as `id`"
+
     export INSTANCE="${1}"
     export EXIST_HOME="${2}"
     export INSTALLSRC="${3}"
