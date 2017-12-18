@@ -4,7 +4,7 @@ Description=Gawati API server
 [Service]
 User=${RUNAS_USER}
 WorkingDirectory=${SERVER_HOME}
-ExecStart=/usr/bin/node ./bin/www >>${SERVER_HOME}/www.log 2>&1
+ExecStart=/usr/bin/node ./cron.js >>${SERVER_HOME}/cron.log 2>&1
 
 [Install]
 WantedBy=multi-user.target
