@@ -35,6 +35,7 @@ EndOfScriptAsRUNAS_USER
 
   echo "${OPTIONS}" | grep -i daemon >/dev/null && {
     cfgwrite "${CFGSRC}/gawatiserver.service" "/etc/systemd/system" "gawatiserver.service"
+    systemctl daemon-reload
     systemctl enable gawatiserver
     systemctl start gawatiserver
     }
