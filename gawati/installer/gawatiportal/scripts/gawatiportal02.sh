@@ -2,7 +2,7 @@
 
 function readconfig {
   VERSION="${2}"
-  ZIP_PORTAL="portal-v${VERSION}.zip"
+  ZIP_PORTAL="portal-ui-${VERSION}.zip"
 
   installer_init "${1}" "${ZIP_PORTAL}" "https://github.com/gawati/gawati-portal-ui/releases/download/${VERSION}/${ZIP_PORTAL}"
   
