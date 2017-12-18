@@ -2,6 +2,7 @@
 service eXist-be stop
 service eXist-st stop
 service jetty-dev01 stop
+systemctl stop gawatiserver
 yes | rm /etc/init.d/eXist-*
 yes | rm /etc/init.d/jetty-dev01
 yes | rm -rf /home/xstbe/apps

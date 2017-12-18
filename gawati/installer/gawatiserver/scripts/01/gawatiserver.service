@@ -1,0 +1,11 @@
+[Unit]
+Description=Gawati API server
+
+[Service]
+User=${RUNAS_USER}
+WorkingDirectory=${SERVER_HOME}
+ExecStart=/usr/bin/node ./bin/www >${SERVER_HOME}/node.log 2>&1
+
+[Install]
+WantedBy=multi-user.target
+
