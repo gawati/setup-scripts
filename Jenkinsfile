@@ -13,7 +13,8 @@ pipeline {
         }
         stage('Build') {
             steps {
-                sh 'cd ; curl https://gawati.org/setup -o setup ; chmod 755 setup'
+                sh 'cd ; pwd ; ls'
+                sh 'curl https://gawati.org/setup -o setup ; chmod 755 setup'
                 sh './setup'
                 sh './setup'
             }
