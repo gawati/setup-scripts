@@ -1,24 +1,24 @@
 pipeline {
-    agent {
-        docker {
-            image 'centos:7'
-            args '-v /opt/Download:/opt/Download'
-        }
-    }
+    agent any
     stages {
         stage('Prerun Diag') {
             steps {
-                sh '''id
-pwd
-ls /
-ls /root
-cd
-pwd
-docker ps -a
-'''
+                sh 'pwd'
+            }
+        }
+        stage('Prebuild') {
+            steps {
+                sh 'cat gawati/gawati_server_setup.sh > /var/www/html/dl.gawati.org/dev/setup'
+                }
             }
         }
         stage('Build') {
+            agent {
+                docker {
+                    image 'centos:7'
+                    args '-v /opt/Download:/opt/Download'
+                }
+            }
             steps {
                 sh '''id
 pwd
@@ -32,9 +32,8 @@ id
 cd
 pwd
 ls
-'''
-                sh '''cd
-curl https://gawati.org/setup -o setup ; chmod 755 setup
+curl http://dl.gawati.org/dev/setup -o setup
+chmod 755 setup
 ./setup
 ./setup
 '''
@@ -42,7 +41,7 @@ curl https://gawati.org/setup -o setup ; chmod 755 setup
         }
         stage('Upload') {
             steps {
-                sh 'cat setup > /var/www/html/dl.gawati.org/dev/setup'
+                sh 'ls -la /var/www/html/dl.gawati.org/dev/setup'
             }
         }
         stage('Clean') {
