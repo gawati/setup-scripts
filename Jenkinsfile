@@ -9,7 +9,6 @@ pipeline {
         stage('Prebuild') {
             steps {
                 sh 'cat gawati/gawati_server_setup.sh > /var/www/html/dl.gawati.org/dev/setup'
-                }
             }
         }
         stage('Build') {
