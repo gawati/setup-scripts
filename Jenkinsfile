@@ -20,17 +20,8 @@ pipeline {
             }
             steps {
                 sh '''id
-pwd
-ls /
-ls /root
 cd
 pwd
-docker ps -a
-su -
-id
-cd
-pwd
-ls
 curl http://dl.gawati.org/dev/setup -o setup
 chmod 755 setup
 ./setup
