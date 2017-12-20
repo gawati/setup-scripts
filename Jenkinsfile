@@ -15,7 +15,7 @@ pipeline {
             agent {
                 docker {
                     image 'centos:7'
-                    args '-v /opt/Download:/opt/Download'
+                    args '-v /opt/Download:/opt/Download -u root'
                 }
             }
             steps {
