@@ -8,15 +8,36 @@ pipeline {
     stages {
         stage('Prerun Diag') {
             steps {
-                sh 'pwd'
+                sh '''id
+pwd
+ls /
+ls /root
+cd
+pwd
+docker ps -a
+'''
             }
         }
         stage('Build') {
             steps {
-                sh 'su - ; id ; cd ; pwd ; ls'
-                sh 'curl https://gawati.org/setup -o setup ; chmod 755 setup'
-                sh './setup'
-                sh './setup'
+                sh '''id
+pwd
+ls /
+ls /root
+cd
+pwd
+docker ps -a
+su -
+id
+cd
+pwd
+ls
+'''
+                sh '''cd
+curl https://gawati.org/setup -o setup ; chmod 755 setup
+./setup
+./setup
+'''
             }
         }
         stage('Upload') {
