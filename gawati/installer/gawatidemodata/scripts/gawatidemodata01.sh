@@ -9,8 +9,8 @@ function install {
   XMLZIP="${DOWNLOADFOLDER}/akn_xml_sample-${VERSION}.zip"
   vardebug PDFZIP XMLZIP
 
-  download "${PDFZIP}" "https://github.com/gawati/gawati-data-xml/releases/download/${VERSION}/akn_pdf_sample-${VERSION}.zip"
-  download "${XMLZIP}" "https://github.com/gawati/gawati-data-xml/releases/download/${VERSION}/akn_xml_sample-${VERSION}.zip"
+  download "${PDFZIP}" "http://dl.gawati.org/demodata/akn_pdf_sample-${VERSION}.zip"
+  download "${XMLZIP}" "http://dl.gawati.org/demodata/akn_xml_sample-${VERSION}.zip"
 
   OSinstall unzip 1
 

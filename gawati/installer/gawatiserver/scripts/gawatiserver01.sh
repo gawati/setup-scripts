@@ -2,7 +2,7 @@ function readconfig {
   VERSION="${2}"
   ZIP_SERVER="portal-server-${VERSION}.zip"
 
-  installer_init "${1}" "${ZIP_SERVER}" "https://github.com/gawati/gawati-portal-server/releases/download/${VERSION}/${ZIP_SERVER}"
+  installer_init "${1}" "${ZIP_SERVER}" "http://dl.gawati.org/${TARGET}/${ZIP_SERVER}"
 
   export SERVER_HOME="${INSTANCE_PATH}/portal"
 

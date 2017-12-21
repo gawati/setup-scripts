@@ -4,7 +4,7 @@ function readconfig {
   VERSION="${2}"
   ZIP_PORTAL="portal-ui-${VERSION}.zip"
 
-  installer_init "${1}" "${ZIP_PORTAL}" "https://github.com/gawati/gawati-portal-ui/releases/download/${VERSION}/${ZIP_PORTAL}"
+  installer_init "${1}" "${ZIP_PORTAL}" "http://dl.gawati.org/${TARGET}/${ZIP_PORTAL}"
   
   export GAWATI_URL_ROOT="`iniget \"${INSTANCE}\" GAWATI_URL_ROOT`"
   export GAWATI_URL_ROOT_="`echo ${GAWATI_URL_ROOT} | tr . _`"
@@ -20,7 +20,7 @@ function install {
   CFGDST="/etc/httpd/conf.d"
   vardebug ZIP_TEMPLATE CFGSRC CFGDST
 
-  download "${DOWNLOADFOLDER}/${ZIP_TEMPLATE}" "https://github.com/gawati/gawati-templates/releases/download/${VERSION_TEMPLATE}/${ZIP_TEMPLATE}"
+  download "${DOWNLOADFOLDER}/${ZIP_TEMPLATE}" "http://dl.gawati.org/${TARGET}/${ZIP_TEMPLATE}"
 
   addtohosts "${MainIP}" "${GAWATI_URL_ROOT}"
 
