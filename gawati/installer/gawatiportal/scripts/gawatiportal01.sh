@@ -4,7 +4,7 @@ function readconfig {
   VERSION="${2}"
   ZIPFILE="gawati-templates-${VERSION}.zip"
 
-  installer_init "${1}" "${ZIPFILE}" "https://github.com/gawati/gawati-templates/releases/download/${VERSION}/${ZIPFILE}"
+  installer_init "${1}" "${ZIPFILE}" "http://dl.gawati.org/${TARGET}/${ZIPFILE}"
   
   export GAWATI_URL_ROOT="`iniget \"${INSTANCE}\" GAWATI_URL_ROOT`"
   export GAWATI_URL_ROOT_="`echo ${GAWATI_URL_ROOT} | tr . _`"
