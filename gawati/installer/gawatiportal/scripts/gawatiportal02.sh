@@ -33,7 +33,7 @@ function install {
     chown root:apache "${WWWROOT}"
     }
 
-  PORTALWEBFOLDER="${WWWROOT}/v2"
+  PORTALWEBFOLDER="${WWWROOT}"
   vardebug PORTALWEBFOLDER
   [ -e "${PORTALWEBFOLDER}" ] || {
     mkdir -p "${PORTALWEBFOLDER}"
