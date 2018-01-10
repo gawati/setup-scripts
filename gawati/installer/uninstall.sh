@@ -14,4 +14,5 @@ yes | rm -rf /root/import/*
 yes | rm -rf /opt/Download/gawati-templates-*
 yes | rm -rf /opt/Download/akn_*_sample-*
 yes | rm -rf /home/gawatiserver/portal
+yes | rm -f /opt/Download/*-latest.???
 
