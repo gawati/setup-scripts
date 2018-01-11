@@ -12,21 +12,8 @@ pipeline {
             }
         }
         stage('Build') {
-            agent {
-                docker {
-                    image 'centos:7'
-                    args '-v /opt/Download:/opt/Download -u root'
-                }
-            }
             steps {
-                sh '''id
-cd
-pwd
-curl http://dl.gawati.org/dev/setup -o setup
-chmod 755 setup
-./setup
-./setup
-'''
+                sh 'sudo /usr/local/bin/devrefresh'
             }
         }
         stage('Upload') {
