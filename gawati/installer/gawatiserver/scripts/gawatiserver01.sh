@@ -2,12 +2,15 @@ function readconfig {
   VERSION="${2}"
   ZIP_SERVER="portal-server-${VERSION}.zip"
 
-  installer_init "${1}" "${ZIP_SERVER}" "http://dl.gawati.org/${TARGET}/${ZIP_SERVER}"
+  installer_init "${1}" "${ZIP_SERVER}" "http://dl.gawati.org/${PKGSRC}/${ZIP_SERVER}"
 
   export SERVER_HOME="${INSTANCE_PATH}/portal"
 
-  vardebug SERVER_HOME
-  setvars SERVER_HOME
+  export SERVER_PORT="`iniget \"${INSTANCE}\" port`"
+  export SERVER_APIPORT="`iniget \"${INSTANCE}\" api_port`"
+
+  vardebug SERVER_HOME SERVER_PORT SERVER_APIPORT
+  setvars SERVER_HOME SERVER_PORT SERVER_APIPORT
   }
 
 function install {
@@ -34,13 +37,13 @@ function install {
 EndOfScriptAsRUNAS_USER
 
   echo "${OPTIONS}" | grep -i daemon >/dev/null && {
-    cfgwrite "${CFGSRC}/gawatiserver.service" "/etc/systemd/system" "gawatiserver.service"
-    cfgwrite "${CFGSRC}/gawaticron.service" "/etc/systemd/system" "gawaticron.service"
+    cfgwrite "${CFGSRC}/gawatiserver.service" "/etc/systemd/system" "${RUNAS_USER}_server.service"
+    cfgwrite "${CFGSRC}/gawaticron.service" "/etc/systemd/system" "${RUNAS_USER}_cron.service"
     systemctl daemon-reload
-    systemctl enable gawatiserver
-    systemctl start gawatiserver
-    systemctl enable gawaticron
-    systemctl start gawaticron
+    systemctl enable ${RUNAS_USER}_server
+    systemctl start ${RUNAS_USER}_server
+    systemctl enable ${RUNAS_USER}_cron
+    systemctl start ${RUNAS_USER}_cron
     }
   }
 

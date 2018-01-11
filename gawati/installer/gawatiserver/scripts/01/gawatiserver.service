@@ -5,9 +5,9 @@ Description=Gawati API server
 User=${RUNAS_USER}
 WorkingDirectory=${SERVER_HOME}
 Environment=HOST=127.0.0.1
-Environment=PORT=9001
+Environment=PORT=${SERVER_PORT}
 Environment=API_HOST=127.0.0.1
-Environment=API_PORT=8080
+Environment=API_PORT=${SERVER_APIPORT}
 ExecStart=/usr/bin/node ./bin/www
 
 [Install]

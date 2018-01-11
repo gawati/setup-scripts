@@ -23,8 +23,9 @@ function install {
 
   OSinstall xmlstarlet 1
 
+  export serviceName="${RUNAS_USER}_exist"
   export adminPasswd="`< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c10`"
-  setvars adminPasswd
+  setvars serviceName adminPasswd
 
   addsummary "Admin Password of existDB instance ${INSTANCE}: >${adminPasswd}<"
 
@@ -40,6 +41,7 @@ function install {
     export EXIST_SPORT="${5}"
     export EXIST_DATA="${6}"
     export adminPasswd="${7}"
+    export serviceName="`whoami`_exist"
 
     function set_jettyxml_property {
       PROPERTY="${1}"
@@ -95,7 +97,7 @@ function install {
     sed -i "s%^.*wrapper.app.account=.*$%wrapper.app.account=${USER}%" "${EXIST_HOME}/tools/yajsw/conf/wrapper.conf"
     bin/client.sh --no-gui --local --user admin --xpath "xmldb:change-user('admin','${adminPasswd}','dba','/db')" >/dev/null
     echo -e "\033[0;32mYour eXistDB instance >${INSTANCE}< has admin password: >${adminPasswd}<\033[0m"
-    set_yajsm_property wrapper.ntservice.name "${INSTANCE}" wrapper
+    set_yajsm_property wrapper.ntservice.name "${serviceName}" wrapper
     cd "${JETTY_HOME}/etc"
     set_jettyxml_property jetty.port "${EXIST_PORT}"
     set_jettyxml_property jetty.ssl.port "${EXIST_SPORT}"
@@ -103,32 +105,32 @@ function install {
 EndOfScriptAsRUNAS_USER
 
   echo "${OPTIONS}" | grep -i daemon >/dev/null && {
-    message 1 "Installing eXistdb instance in >${EXIST_HOME}< as daemon named >${INSTANCE}< running as user >${RUNAS_USER}<."
+    message 1 "Installing eXistdb instance in >${EXIST_HOME}< as daemon named >${serviceName}< running as user >${RUNAS_USER}<."
 
     export RUN_AS_USER="${RUNAS_USER}"
     cd "${EXIST_HOME}"
     echo N | tools/yajsw/bin/installDaemon.sh >/dev/null
 
-    [ -f "/etc/init.d/${INSTANCE}" ] && {
-      cat "/etc/init.d/${INSTANCE}" | sed 's%^\(.*/usr/lib/jvm/jre-1.8.0-openjdk\).*\(/jre/bin/java.*\)$%\1\2%g' > /tmp/initfile
-      cat /tmp/initfile > "/etc/init.d/${INSTANCE}"
+    [ -f "/etc/init.d/${serviceName}" ] && {
+      cat "/etc/init.d/${serviceName}" | sed 's%^\(.*/usr/lib/jvm/jre-1.8.0-openjdk\).*\(/jre/bin/java.*\)$%\1\2%g' > /tmp/initfile
+      cat /tmp/initfile > "/etc/init.d/${serviceName}"
       rm /tmp/initfile
-      chcon -u system_u "/etc/init.d/${INSTANCE}"
-      chkconfig --add "${INSTANCE}"
-      chkconfig "${INSTANCE}" on
+      chcon -u system_u "/etc/init.d/${serviceName}"
+      chkconfig --add "${serviceName}"
+      chkconfig "${serviceName}" on
       }
 
-    message 1 "Waiting for service >${INSTANCE}< to come up."
-    systemctl restart "${INSTANCE}" 
-    timeout 20s grep -q "Service ${INSTANCE} started" <(tail -n 5 -f /var/log/messages) && {
-      message 1 ">${INSTANCE}< started as service."
+    message 1 "Waiting for service >${serviceName}< to come up."
+    systemctl restart "${serviceName}" 
+    timeout 20s grep -q "Service ${serviceName} started" <(tail -n 5 -f /var/log/messages) && {
+      message 1 ">${serviceName}< started as service."
       } || {
-      message 3 ">${INSTANCE}< failed to start as service."
+      message 3 ">${serviceName}< failed to start as service."
       }
 
     maxwait=20
     i=0
-    message 4 "Waiting up to ${maxwait} seconds for >${INSTANCE}< to start answering requests."
+    message 4 "Waiting up to ${maxwait} seconds for >${serviceName}< to start answering requests."
     until curl -s -o /dev/null -w '%{http_code}' "http://localhost:${EXIST_PORT}"; do
       message 4 "${i}.. "
       ((i++))
@@ -137,9 +139,9 @@ EndOfScriptAsRUNAS_USER
       done
 
     [ $i -gt ${maxwait} ] && {
-      bail_out ">${INSTANCE}< fails to service requests."
+      bail_out ">${serviceName}< fails to service requests."
       } || {
-      message 1 ">${INSTANCE}< responds to requests."
+      message 1 ">${serviceName}< responds to requests."
       }
     }
   }

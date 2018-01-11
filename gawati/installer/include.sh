@@ -1,6 +1,8 @@
 OSinstall gettext 1
 OSinstall iproute 1
 
+export PKGSRC="`iniget options pkgsrc`"
+vardebug PKGSRC
 
 function set_environment_java {
   echo 'JAVA_HOME="`readlink -f /usr/bin/java | sed "s:/bin/java::"`"' >~/.javarc
@@ -16,6 +18,7 @@ function setvar {
   FORINSTANCE="${3:-${INSTANCE}}"
   localvar="`echo ${FORINSTANCE}_${1} | tr '.-' '_'`"
   declare -g "${localvar}"="${VALUE}"
+  export ${localvar}
   vardebug ${localvar}
   }
 
