@@ -47,6 +47,7 @@ $entries = @{
 
 setHostEntries($entries)
 
+#Install-Module -Force Posh-SSH
 
 Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
 
