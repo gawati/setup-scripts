@@ -1,5 +1,11 @@
 pipeline {
     agent any
+    options {
+        disableConcurrentBuilds()
+        triggers {
+            upstream(upstreamProjects: 'gawati-data,gawati-data-xml,gawati-portal-server,gawati-portal-ui,gawati-templates', threshold: hudson.model.Result.SUCCESS)
+        }
+    }
     stages {
         stage('Prerun Diag') {
             steps {
