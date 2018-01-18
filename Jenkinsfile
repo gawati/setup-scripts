@@ -33,5 +33,10 @@ pipeline {
             }
         }
     }
+    post {
+        always {
+            slackSend (message: "${currentBuild.result}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+        }
+    }
 }
 
