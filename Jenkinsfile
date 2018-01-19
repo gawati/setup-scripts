@@ -1,5 +1,11 @@
 pipeline {
     agent any
+    triggers {
+        upstream(upstreamProjects: 'gawati-data,gawati-data-xml,gawati-portal-server,gawati-portal-ui,gawati-templates', threshold: hudson.model.Result.SUCCESS)
+    }
+    options {
+        disableConcurrentBuilds()
+    }
     stages {
         stage('Prerun Diag') {
             steps {
@@ -25,6 +31,11 @@ pipeline {
             steps {
                 cleanWs(cleanWhenAborted: true, cleanWhenNotBuilt: true, cleanWhenSuccess: true, cleanWhenUnstable: true, cleanupMatrixParent: true, deleteDirs: true)
             }
+        }
+    }
+    post {
+        always {
+            slackSend (message: "${currentBuild.result}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
         }
     }
 }
