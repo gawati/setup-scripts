@@ -1,7 +1,7 @@
 pipeline {
     agent any
     triggers {
-        upstream(upstreamProjects: '../gawati-data,../gawati-data-xml,../gawati-portal-server,../gawati-portal-ui,../gawati-templates', threshold: hudson.model.Result.SUCCESS)
+        upstream(upstreamProjects: 'gawati/gawati-data/master,gawati/gawati-data-xml/master,gawati/gawati-portal-server/master,gawati/gawati-portal-ui/master,gawati/gawati-templates/master', threshold: hudson.model.Result.SUCCESS)
     }
     options {
         disableConcurrentBuilds()
