@@ -18,6 +18,7 @@ pipeline {
         stage('Prerun Diag') {
             steps {
                 sh 'pwd'
+                sh '(set -o posix; set)'
             }
         }
         stage('Prebuild') {
