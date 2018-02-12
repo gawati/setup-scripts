@@ -28,7 +28,7 @@ pipeline {
         }
         stage('Build') {
             steps {
-                sh 'sudo /usr/local/bin/devrefresh'
+                sh 'sudo /usr/local/bin/devrefresh "${GIT_BRANCH}"'
             }
         }
         stage('Upload') {
