@@ -56,7 +56,6 @@ function install {
     }
 
   OSinstall unzip 1
-  OSinstall nodejs 1
 
   [ -f "${DOWNLOADFOLDER}/${ZIP_PORTAL}" ] || bail_out "Portal package not available at >${DOWNLOADFOLDER}/${ZIP_PORTAL}<"
   unzip -q "${DOWNLOADFOLDER}/${ZIP_PORTAL}" -d "${PORTALWEBFOLDER}"
