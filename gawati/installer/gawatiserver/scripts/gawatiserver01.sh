@@ -22,6 +22,8 @@ function install {
   CFGSRC="${INSTALLER_HOME}/01"
   vardebug CFGSRC
 
+  OSinstall nodejs 1
+
   message 1 "Installing to folder >${SERVER_HOME}< as user >${RUNAS_USER}<."
 
   sudo -u "${RUNAS_USER}" bash -s "${INSTALLSRC}" "${SERVER_HOME}" <<'EndOfScriptAsRUNAS_USER'
