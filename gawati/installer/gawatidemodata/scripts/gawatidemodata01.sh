@@ -19,12 +19,13 @@ function install {
   GAWATI_URL_ROOT="`getvar GAWATI_URL_ROOT gawatifrontend`"
   askifempty GAWATI_URL_ROOT "Please provide the full public DNS hostname for your Gawati server."
   WWWROOT="/var/www/html/${GAWATI_URL_ROOT}"
-  vardebug GAWATI_URL_ROOT WWWROOT
+  MEDIAROOT="/var/www/html/media.${GAWATI_URL_ROOT}"
+  vardebug GAWATI_URL_ROOT WWWROOT MEDIAROOT
 
   [ -f "${PDFZIP}" ] || bail_out "Demodata documents package not available at >${PDFZIP}<"
-  unzip -q "${PDFZIP}" -d "${WWWROOT}"
-  [ -d "${WWWROOT}/akn" ] || bail_out "Failed to deploy documents."
-  chown -R root:apache "${WWWROOT}/akn"
+  unzip -q "${PDFZIP}" -d "${MEDIAROOT}"
+  [ -d "${MEDIAROOT}/akn" ] || bail_out "Failed to deploy documents."
+  chown -R root:apache "${MEDIAROOT}/akn"
 
   STIMPORT="`iniget \"${INSTANCE}\" importFolder`"
   [ -e "${STIMPORT}" ] || mkdir -p "${STIMPORT}"

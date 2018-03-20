@@ -25,12 +25,20 @@ function install {
   addtohosts "${MainIP}" "${GAWATI_URL_ROOT}"
 
   cfgwrite "${CFGSRC}/10-gawati.conf" "${CFGDST}" "10-${GAWATI_URL_ROOT}.conf"
+  cfgwrite "${CFGSRC}/10-media.gawati.conf" "${CFGDST}" "10-media.${GAWATI_URL_ROOT}.conf"
 
   WWWROOT="/var/www/html/${GAWATI_URL_ROOT}"
   vardebug WWWROOT
   [ -e "${WWWROOT}" ] || {
     mkdir -p "${WWWROOT}"
     chown root:apache "${WWWROOT}"
+    }
+
+  MEDIAROOT="/var/www/html/media.${GAWATI_URL_ROOT}"
+  vardebug MEDIAROOT
+  [ -e "${MEDIAROOT}" ] || {
+    mkdir -p "${MEDIAROOT}"
+    chown root:apache "${MEDIAROOT}"
     }
 
   PORTALWEBFOLDER="${WWWROOT}"
