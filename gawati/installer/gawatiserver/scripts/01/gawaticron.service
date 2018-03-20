@@ -4,6 +4,10 @@ Description=Gawati API server
 [Service]
 User=${RUNAS_USER}
 WorkingDirectory=${SERVER_HOME}
+Environment=HOST=127.0.0.1
+Environment=PORT=${SERVER_PORT}
+Environment=API_HOST=127.0.0.1
+Environment=API_PORT=${SERVER_APIPORT}
 ExecStart=/usr/bin/node ./cron.js
 
 [Install]
