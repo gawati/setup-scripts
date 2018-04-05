@@ -23,6 +23,7 @@ function install {
   download "${DOWNLOADFOLDER}/${ZIP_TEMPLATE}" "http://dl.gawati.org/${PKGSRC}/${ZIP_TEMPLATE}"
 
   addtohosts "${MainIP}" "${GAWATI_URL_ROOT}"
+  addtohosts "${MainIP}" "media.${GAWATI_URL_ROOT}"
 
   cfgwrite "${CFGSRC}/10-gawati.conf" "${CFGDST}" "10-${GAWATI_URL_ROOT}.conf"
   cfgwrite "${CFGSRC}/10-media.gawati.conf" "${CFGDST}" "10-media.${GAWATI_URL_ROOT}.conf"
