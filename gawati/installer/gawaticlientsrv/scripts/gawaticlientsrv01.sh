@@ -6,9 +6,12 @@ function readconfig {
 
   export SERVER_HOME="${INSTANCE_PATH}/portal"
   export SERVER_PORT="`iniget \"${INSTANCE}\" port`"
+  export KC_REALM="`iniget \"options" kc_realm`"
+  export KC_URL="`iniget \"options" kc_authurl`"
+  export KC_SECRET="`iniget \"options" kc_secret`"
 
-  vardebug SERVER_HOME SERVER_PORT
-  setvars SERVER_HOME SERVER_PORT
+  vardebug SERVER_HOME SERVER_PORT KC_REALM KC_URL KC_SECRET
+  setvars SERVER_HOME SERVER_PORT KC_REALM KC_URL KC_SECRET
   }
 
 function install {
