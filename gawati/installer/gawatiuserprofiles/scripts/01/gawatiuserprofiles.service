@@ -6,7 +6,7 @@ User=${RUNAS_USER}
 WorkingDirectory=${SERVER_HOME}
 Environment=HOST=127.0.0.1
 Environment=PORT=${SERVER_PORT}
-ExecStart=/usr/bin/node server.js
+ExecStart=/usr/bin/node ./bin/www
 
 [Install]
 WantedBy=multi-user.target
