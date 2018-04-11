@@ -9,8 +9,12 @@ function readconfig {
   export GAWATI_URL_ROOT="`iniget \"${INSTANCE}\" GAWATI_URL_ROOT`"
   export GAWATI_URL_ROOT_="`echo ${GAWATI_URL_ROOT} | tr . _`"
   export EXIST_ST_URL="`iniget \"${INSTANCE}\" EXIST_ST_URL`"
+  export KC_REALM="`iniget \"options" kc_realm`"
+  export KC_URL="`iniget \"options" kc_authurl`"
+  export KC_SECRET="`iniget \"options" kc_secret`"
 
-  setvars GAWATI_URL_ROOT GAWATI_URL_ROOT_ EXIST_ST_URL
+  vardebug GAWATI_URL_ROOT GAWATI_URL_ROOT_ EXIST_CL_URL KC_REALM KC_URL KC_SECRET
+  setvars GAWATI_URL_ROOT GAWATI_URL_ROOT_ EXIST_ST_URL KC_REALM KC_URL KC_SECRET
   }
 
 function install {
