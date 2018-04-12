@@ -26,7 +26,8 @@ function install {
   OSinstall unzip 1
 
 
-  cfgwrite "${CFGSRC}/10-edit.gawati.conf" "${CFGDST}" "10-edit.${GAWATI_URL_ROOT}.conf"
+  #cfgwrite "${CFGSRC}/10-edit.gawati.conf" "${CFGDST}" "10-edit.${GAWATI_URL_ROOT}.conf"
+  cfgwrite "${CFGSRC}/10-data.gawati.conf" "${CFGDST}" "10-data.${GAWATI_URL_ROOT}.conf"
 
   EDITROOT="/var/www/html/edit.${GAWATI_URL_ROOT}"
   vardebug EDITROOT
