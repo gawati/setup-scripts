@@ -11,9 +11,10 @@ function readconfig {
   export KC_REALM="`iniget \"options" kc_realm`"
   export KC_URL="`iniget \"options" kc_authurl`"
   export KC_SECRET="`iniget \"options" kc_secret`"
+  export GWC_PORT="`iniget \"${INSTANCE}\" port`"
 
-  vardebug GAWATI_URL_ROOT GAWATI_URL_ROOT_ GAWATI_URL_ROOT_ESC EXIST_CL_URL KC_REALM KC_URL KC_SECRET
-  setvars GAWATI_URL_ROOT GAWATI_URL_ROOT_ GAWATI_URL_ROOT_ESC EXIST_CL_URL KC_REALM KC_URL KC_SECRET
+  vardebug GAWATI_URL_ROOT GAWATI_URL_ROOT_ GAWATI_URL_ROOT_ESC EXIST_CL_URL KC_REALM KC_URL KC_SECRET GWC_PORT
+  setvars GAWATI_URL_ROOT GAWATI_URL_ROOT_ GAWATI_URL_ROOT_ESC EXIST_CL_URL KC_REALM KC_URL KC_SECRET GWC_PORT
   }
 
 function install {
