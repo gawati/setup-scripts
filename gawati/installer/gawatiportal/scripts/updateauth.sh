@@ -1,5 +1,5 @@
 function postinstall {
-  MAINJS="${WWWROOT}/static/keycloak.json"
+  MAINJS="${WWWROOT}/keycloak.json"
   vardebug MAINJS
   [ -f "${MAINJS}" ] || bail_out "File >${MAINJS}< missing."
   sed -i'' "s%realm\([ \"]*\): *\"\([^\"]*\)\"%realm\1:\"${KC_REALM}\"%g" "${MAINJS}"
