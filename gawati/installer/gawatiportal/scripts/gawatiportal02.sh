@@ -91,12 +91,14 @@ function install {
   systemctl restart httpd
   setsebool -P httpd_can_network_connect true
 
-  FILE="/usr/local/bin/fixthumbs"
-  [ -e "${FILE}" ] || {
-    cat "${CFGSRC}/fixthumbs" >"${FILE}"
-    chcon -u system_u "${FILE}"
-    chmod 755 "${FILE}"
-    }
+  for FILE in "fixthumbs" "gawaticheck"; do
+    DSTFILE="/usr/local/bin/${FILE}"
+    [ -e "${DSTFILE}" ] || {
+      cat "${CFGSRC}/${FILE}" >"${DSTFILE}"
+      chcon -u system_u "${DSTFILE}"
+      chmod 755 "${DSTFILE}"
+      }
+    done
 
   [ -e "/usr/local/bin/uninstall" ] || ln -s "${DOWNLOADFOLDER}/installer/uninstall.sh" "/usr/local/bin/uninstall"
 
