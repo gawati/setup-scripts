@@ -7,6 +7,7 @@ baseURL='dev.gawati.org'
 
 packages=[
 {'name': 'gawati-portal-ui', 'URLprefix': '', 'URLpath': ''},
+{'name': 'gawati-client', 'URLprefix': 'data.', 'URLpath': ''},
 {'name': 'gawati-data', 'URLprefix': 'data.', 'URLpath': '/gwd'},
 {'name': 'gawati-portal-server', 'URLprefix': 'data.', 'URLpath': '/gwp'},
 {'name': 'gawati-user-profiles', 'URLprefix': 'data.', 'URLpath': '/gwu'},
