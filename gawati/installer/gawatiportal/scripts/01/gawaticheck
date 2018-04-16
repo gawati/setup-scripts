@@ -10,7 +10,7 @@ parser.add_option('-b', dest='baseURL', default='dev.gawati.org', help='base URL
 baseURL=options.baseURL
 
 packages=[
-{'name': 'gawati-portal-ui', 'URLprefix': '', 'URLpath': ''},
+{'name': 'portal-ui', 'URLprefix': '', 'URLpath': ''},
 {'name': 'gawati-data', 'URLprefix': 'data.', 'URLpath': '/gwd'},
 {'name': 'gawati-portal-server', 'URLprefix': 'data.', 'URLpath': '/gwp'},
 {'name': 'gawati-user-profiles', 'URLprefix': 'data.', 'URLpath': '/gwu'},
