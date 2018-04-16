@@ -1,12 +1,16 @@
 #!/usr/bin/python
 
 import urllib2
+import optparse
 
-baseURL='dev.gawati.org'
+parser = optparse.OptionParser()
+parser.add_option('-b', dest='baseURL', default='dev.gawati.org', help='base URL of Gawati website')
+(options, args) = parser.parse_args()
+
+baseURL=options.baseURL
 
 packages=[
 {'name': 'gawati-portal-ui', 'URLprefix': '', 'URLpath': ''},
-{'name': 'gawati-client', 'URLprefix': 'data.', 'URLpath': ''},
 {'name': 'gawati-data', 'URLprefix': 'data.', 'URLpath': '/gwd'},
 {'name': 'gawati-portal-server', 'URLprefix': 'data.', 'URLpath': '/gwp'},
 {'name': 'gawati-user-profiles', 'URLprefix': 'data.', 'URLpath': '/gwu'},
@@ -17,25 +21,27 @@ packages=[
 services=[]
 
 for package in packages:
-  service = {}
+  service = {'package':'', 'version':'-', 'date':'-'}
 
   try:
     reply = urllib2.urlopen("https://" + package['URLprefix'] + baseURL + package['URLpath'] + "/about").read()
-    reply = reply.split(';')
+    reply = reply.rstrip().split(';')
 
     for data in reply:
       key,value = data.split('=')
       service[key] = value
 
-    services.append([package,service])
-
   except:
-    services.append([package,{'package':'','version':'-'}])
+    pass
+
+  services.append([package,service])
+
 
 for service in services:
+  myURL = 'https://' + service[0]['URLprefix'] + baseURL + service[0]['URLpath']
   if (service[0]['name'] == service[1]['package']):
-    print(service[0]['name'] + ' available. Reported version: ' + service[1]['version'])
+    print(service[0]['name'] + ' available at ' + myURL + ' Reported version: ' + service[1]['version'] + ' of ' + service[1]['date'])
 
   else:
-    print(service[0]['name'] + ' not available at ' + "https://" + service[0]['URLprefix'] + baseURL + service[0]['URLpath'])
+    print(service[0]['name'] + ' not available at ' + myURL)
 
