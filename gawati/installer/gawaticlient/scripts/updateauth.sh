@@ -1,5 +1,5 @@
 function postinstall {
-  MAINJS="${EDITROOT}/static/authRealm.json"
+  MAINJS="${EDITROOT}/authRealm.json"
   vardebug MAINJS
   [ -f "${MAINJS}" ] || bail_out "File >${MAINJS}< missing."
   sed -i'' "s%realm\([ \"]*\): *\"\([^\"]*\)\"%realm\1:\"${KC_REALM}\"%g" "${MAINJS}"
