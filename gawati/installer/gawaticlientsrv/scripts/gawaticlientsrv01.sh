@@ -6,12 +6,16 @@ function readconfig {
 
   export SERVER_HOME="${INSTANCE_PATH}/portal"
   export SERVER_PORT="`iniget \"${INSTANCE}\" port`"
+  export EXIST="`iniget \"${INSTANCE}\" exist`"
   export KC_REALM="`iniget \"options" kc_realm`"
   export KC_URL="`iniget \"options" kc_authurl`"
   export KC_SECRET="`iniget \"options" kc_secret`"
 
-  vardebug SERVER_HOME SERVER_PORT KC_REALM KC_URL KC_SECRET
-  setvars SERVER_HOME SERVER_PORT KC_REALM KC_URL KC_SECRET
+  VARNAME="${EXIST}_EXIST_PORT"
+  export EXIST_URL="http://localhost:${VARNAME}/exist"
+
+  vardebug SERVER_HOME SERVER_PORT EXIST KC_REALM KC_URL KC_SECRET
+  setvars SERVER_HOME SERVER_PORT EXIST KC_REALM KC_URL KC_SECRET
   }
 
 function install {
