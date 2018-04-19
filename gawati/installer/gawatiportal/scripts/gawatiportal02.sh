@@ -9,7 +9,7 @@ function readconfig {
   export GAWATI_URL_ROOT="`iniget \"${INSTANCE}\" GAWATI_URL_ROOT`"
   export GAWATI_URL_ROOT_="`echo ${GAWATI_URL_ROOT} | tr . _`"
   export GAWATI_URL_ROOT_ESC="`echo ${GAWATI_URL_ROOT} | sed 's%\.%\\\.%g'`"
-  export EXIST_ST="`iniget \"${INSTANCE}\" existst`"
+  export EXIST_ST="`iniget \"${INSTANCE}\" existst | tr '-' '_'`"
   export KC_REALM="`iniget \"options" kc_realm`"
   export KC_URL="`iniget \"options" kc_authurl`"
   export KC_SECRET="`iniget \"options" kc_secret`"

@@ -1,4 +1,4 @@
-function readconfig {
+NAME="${EXIST}_LURL"{
   VERSION="${2}"
   ZIP_SERVER="gawati-client-server-${VERSION}.zip"
 
@@ -6,7 +6,7 @@ function readconfig {
 
   export SERVER_HOME="${INSTANCE_PATH}/portal"
   export SERVER_PORT="`iniget \"${INSTANCE}\" port`"
-  export EXIST="`iniget \"${INSTANCE}\" exist`"
+  export EXIST="`iniget \"${INSTANCE}\" exist | tr '-' '_'`"
   export KC_REALM="`iniget \"options" kc_realm`"
   export KC_URL="`iniget \"options" kc_authurl`"
   export KC_SECRET="`iniget \"options" kc_secret`"
