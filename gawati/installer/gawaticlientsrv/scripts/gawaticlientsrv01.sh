@@ -16,7 +16,7 @@ function readconfig {
   VARNAME="${EXIST}_LURL"
   export EXIST_URL="${!VARNAME}"
 
-  vardebug SERVER_HOME SERVER_PORT EXIST KC_REALM KC_URL KC_SECRET EXISTURL
+  vardebug SERVER_HOME SERVER_PORT EXIST KC_REALM KC_URL KC_SECRET VARNAME EXIST_URL
   setvars SERVER_HOME SERVER_PORT EXIST KC_REALM KC_URL KC_SECRET
   }
 
@@ -31,11 +31,12 @@ function install {
 
   message 1 "Installing to folder >${SERVER_HOME}< as user >${RUNAS_USER}<."
 
-  sudo -u "${RUNAS_USER}" bash -s "${INSTALLSRC}" "${SERVER_HOME}" <<'EndOfScriptAsRUNAS_USER'
+  sudo -u "${RUNAS_USER}" bash -s "${INSTALLSRC}" "${SERVER_HOME}" "${EXIST_URL}" <<'EndOfScriptAsRUNAS_USER'
     echo "Running as `id`"
 
     export INSTALLSRC="${1}"
     export SERVER_HOME="${2}"
+    export EXIST_URL="${3}"
 
     mkdir -p "${SERVER_HOME}"
     cd "${SERVER_HOME}"
