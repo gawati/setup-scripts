@@ -11,10 +11,10 @@ function readconfig {
   export KC_URL="`iniget \"options" kc_authurl`"
   export KC_SECRET="`iniget \"options" kc_secret`"
 
-  VARNAME="${EXIST}_EXIST_PORT"
-  export EXIST_URL="http://localhost:${VARNAME}/exist"
+  VARNAME="${EXIST}_LURL"
+  export EXIST_URL="${!VARNAME}"
 
-  vardebug SERVER_HOME SERVER_PORT EXIST KC_REALM KC_URL KC_SECRET
+  vardebug SERVER_HOME SERVER_PORT EXIST KC_REALM KC_URL KC_SECRET EXISTURL
   setvars SERVER_HOME SERVER_PORT EXIST KC_REALM KC_URL KC_SECRET
   }
 
@@ -39,6 +39,8 @@ function install {
     cd "${SERVER_HOME}"
 
     unzip -q "${INSTALLSRC}"
+
+    sed -i'' "s%\(.*serviceEndPoint[^:]*:\).*%\1 \"${EXIST_URL}/restxq\"%g" configs/dataServer.json
 EndOfScriptAsRUNAS_USER
 
   echo "${OPTIONS}" | grep -i daemon >/dev/null && {
