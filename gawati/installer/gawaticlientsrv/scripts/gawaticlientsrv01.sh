@@ -1,4 +1,6 @@
-NAME="${EXIST}_LURL"{
+#!/bin/bash
+
+function readconfig {
   VERSION="${2}"
   ZIP_SERVER="gawati-client-server-${VERSION}.zip"
 
