@@ -52,26 +52,28 @@ function install {
 
     STUSER="`getvar RUNAS_USER ${XSTST}`"
     STHOME="`getvar EXIST_HOME ${XSTST}`"
-    STPORT="`getvar EXIST_PORT ${XSTST}`"
-    STPWD="`getvar adminPasswd ${XSTST}`"
+    EXIST_PORT="`getvar EXIST_PORT ${XSTST}`"
+    EXIST_PWD="`getvar adminPasswd ${XSTST}`"
 
-    askifempty STPWD "Please provide the administrator password for eXist instance >${XSTST}<."
-    setvar adminPasswd "${STPWD}" "${XSTST}"
+    askifempty EXIST_PWD "Please provide the administrator password for eXist instance >${XSTST}<."
+    setvar adminPasswd "${EXIST_PWD}" "${XSTST}"
 
-    STDATAPWD="`${STHOME}/bin/client.sh -ouri=xmldb:exist://localhost:${STPORT}/exist/xmlrpc -u admin -P """${STPWD}""" -x """data(doc('/db/apps/gw-data/_auth/_pw.xml')/users/user[@name = 'gwdata']/@pw)""" 2>/dev/null | tail -1`"
+    STDATAPWD="`${STHOME}/bin/client.sh -ouri=xmldb:exist://localhost:${EXIST_PORT}/exist/xmlrpc -u admin -P """${EXIST_PWD}""" -x """data(doc('/db/apps/gw-data/_auth/_pw.xml')/users/user[@name = 'gwdata']/@pw)""" 2>/dev/null | tail -1`"
 
-    vardebug XSTST STIMPORT STUSER STHOME STPORT STPWD STDATAPWD
+    vardebug XSTST STIMPORT STUSER STHOME EXIST_PORT EXIST_PWD STDATAPWD
 
     message 1 "Importing Data into exist instance >${XSTST}<. This can take a while."
-    RESULT="`${STHOME}/bin/client.sh -ouri=xmldb:exist://localhost:${STPORT}/exist/xmlrpc -u gwdata -P """${STDATAPWD}""" -d -m /db/apps/gw-data/akn -p """${STIMPORT}/akn""" 2>/dev/null | tail -1`"
+    RESULT="`${STHOME}/bin/client.sh -ouri=xmldb:exist://localhost:${EXIST_PORT}/exist/xmlrpc -u gwdata -P """${STDATAPWD}""" -d -m /db/apps/gw-data/akn -p """${STIMPORT}/akn""" 2>/dev/null | tail -1`"
     message 1 "${RESULT}"
 
     message 1 "Importing Fulltext Search Data into exist instance >${XSTST}<. This can take a while."
-    RESULT="`${STHOME}/bin/client.sh -ouri=xmldb:exist://localhost:${STPORT}/exist/xmlrpc -u gwdata -P """${STDATAPWD}""" -d -m /db/apps/gw-data/akn_ft -p """${STIMPORT}/akn_ft""" 2>/dev/null | tail -1`"
+    RESULT="`${STHOME}/bin/client.sh -ouri=xmldb:exist://localhost:${EXIST_PORT}/exist/xmlrpc -u gwdata -P """${STDATAPWD}""" -d -m /db/apps/gw-data/akn_ft -p """${STIMPORT}/akn_ft""" 2>/dev/null | tail -1`"
     message 1 "${RESULT}"
 
     message 1 "Importing Management Client Data into exist instance >${XSTST}<. This can take a while."
-    RESULT="`${STHOME}/bin/client.sh -ouri=xmldb:exist://localhost:${STPORT}/exist/xmlrpc -u gwdata -P """${STDATAPWD}""" -d -m /db/docs/gawati-client-data/akn -p """${STIMPORT}/gawati-client-data""" 2>/dev/null | tail -1`"
+    EXIST_DIR='/db/docs/gawati-client-data/akn'
+    exist_query EXIST_DO_FILE_MKDIRS
+    RESULT="`${STHOME}/bin/client.sh -ouri=xmldb:exist://localhost:${EXIST_PORT}/exist/xmlrpc -u gwdata -P """${STDATAPWD}""" -d -m /db/docs/gawati-client-data/akn -p """${STIMPORT}/gawati-client-data""" 2>/dev/null | tail -1`"
     message 1 "${RESULT}"
     }
   }
