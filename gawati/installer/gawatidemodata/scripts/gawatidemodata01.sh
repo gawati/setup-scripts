@@ -8,11 +8,13 @@ function install {
   PDFZIP="${DOWNLOADFOLDER}/akn_pdf_sample-${VERSION}.zip"
   XMLZIP="${DOWNLOADFOLDER}/akn_xml_sample-${VERSION}.zip"
   FTZIP="${DOWNLOADFOLDER}/akn_xml_ft_sample-${VERSION}.zip"
-  vardebug PDFZIP XMLZIP FTZIP
+  CLZIP="${DOWNLOADFOLDER}/gawati_client_data_sample-${VERSION}.zip"
+  vardebug PDFZIP XMLZIP FTZIP CLZIP
 
   download "${PDFZIP}" "http://dl.gawati.org/demodata/akn_pdf_sample-${VERSION}.zip"
   download "${XMLZIP}" "http://dl.gawati.org/demodata/akn_xml_sample-${VERSION}.zip"
   download "${FTZIP}" "http://dl.gawati.org/demodata/akn_xml_ft_sample-${VERSION}.zip"
+  download "${CLZIP}" "http://dl.gawati.org/demodata/gawati_client_data_sample-${VERSION}.zip"
 
   OSinstall unzip 1
 
@@ -40,6 +42,11 @@ function install {
   [ -d "${STIMPORT}/akn_ft" ] || bail_out "Failed to deploy search index."
   chown -R root:apache "${STIMPORT}/akn_ft"
 
+  [ -f "${CLZIP}" ] || bail_out "XML demodata package not available at >${CLZIP}<"
+  unzip -q "${CLZIP}" -d "${STIMPORT}"
+  [ -d "${STIMPORT}/gawati-client-data" ] || bail_out "Failed to deploy search index."
+  chown -R root:apache "${STIMPORT}/gawati-client-data"
+
   [ -d "${STIMPORT}" ] && {
     XSTST="`iniget \"${INSTANCE}\" existst`"
 
@@ -61,6 +68,10 @@ function install {
 
     message 1 "Importing Fulltext Search Data into exist instance >${XSTST}<. This can take a while."
     RESULT="`${STHOME}/bin/client.sh -ouri=xmldb:exist://localhost:${STPORT}/exist/xmlrpc -u gwdata -P """${STDATAPWD}""" -d -m /db/apps/gw-data/akn_ft -p """${STIMPORT}/akn_ft""" 2>/dev/null | tail -1`"
+    message 1 "${RESULT}"
+
+    message 1 "Importing Management Client Data into exist instance >${XSTST}<. This can take a while."
+    RESULT="`${STHOME}/bin/client.sh -ouri=xmldb:exist://localhost:${STPORT}/exist/xmlrpc -u gwdata -P """${STDATAPWD}""" -d -m /db/docs/gawati-client-data/akn -p """${STIMPORT}/gawati-client-data""" 2>/dev/null | tail -1`"
     message 1 "${RESULT}"
     }
   }
