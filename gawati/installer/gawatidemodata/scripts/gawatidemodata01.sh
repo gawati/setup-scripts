@@ -71,7 +71,7 @@ function install {
     message 1 "${RESULT}"
 
     message 1 "Importing Management Client Data into exist instance >${XSTST}<. This can take a while."
-    EXIST_DIR='/db/docs/gawati-client-data/akn'
+    export EXIST_DIR='/db/docs/gawati-client-data/akn'
     exist_query EXIST_DO_FILE_MKDIRS
     RESULT="`${STHOME}/bin/client.sh -ouri=xmldb:exist://localhost:${EXIST_PORT}/exist/xmlrpc -u gwdata -P """${STDATAPWD}""" -d -m /db/docs/gawati-client-data/akn -p """${STIMPORT}/gawati-client-data""" 2>/dev/null | tail -1`"
     message 1 "${RESULT}"
