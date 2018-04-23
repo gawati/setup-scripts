@@ -199,6 +199,6 @@ EXIST_DO_REPO_LIST='repo:list()'
 EXIST_DO_REPO_UNDEPLOY='repo:undeploy("${EXIST_APPNAME}")'
 EXIST_DO_REPO_REMOVE='repo:remove("${EXIST_APPNAME}")'
 EXIST_DO_REPO_INSTALL='repo:install-and-deploy("${EXIST_APPNAME}","${SOURCE_URL}")'
-EXIST_DO_XMLDB_CREATECOLLECTION='xmldb:create-collection("${COLLECTION}")'
+EXIST_DO_XMLDB_CREATECOLLECTION='xmldb:create-collection("/db","${COLLECTION}")'
 EXIST_DO_FILE_MKDIRS='file:mkdirs("${EXIST_DIR}")'
 
