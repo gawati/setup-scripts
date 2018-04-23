@@ -190,7 +190,9 @@ function exist_query {
   vardebug MYPOST MYUSER MYPWD MYPORT
   declare -g RESPONSE
   RESPONSE="`curl -s -H "Content-Type: text/xml" -u "${MYUSER}:${MYPWD}" -w "%{http_code}" -d "${MYPOST}" "http://localhost:${MYPORT}/exist/rest/db"`"
-  vardebug RESPONSE
+  CODE="`echo "${RESPONSE]" | tail -1 | grep '>' | sed 's%.*>\(.*\)%\1%g'`"
+  vardebug RESPONSE CODE
+  [ "${CODE}" != "200" ] && bail_out 1 "Exist query failed."
   }
 
 EXIST_DO_REPO_LIST='repo:list()'
