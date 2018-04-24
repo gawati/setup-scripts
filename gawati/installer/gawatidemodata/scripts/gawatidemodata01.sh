@@ -72,8 +72,8 @@ function install {
 
     message 1 "Importing Management Client Data into exist instance >${XSTST}<. This can take a while."
     export EXIST_DIR='docs/gawati-client-data'
-    export COLLUSER="gwdata"
-    export COLLGROUP="gwdata"
+    export COLLUSER="gawati-client-data"
+    export COLLGROUP="gawati-client-data"
     exist_query EXIST_DO_XMLDB_CREATECOLLECTION
     exist_query EXIST_DO_SM_CHOWN
     exist_query EXIST_DO_SM_CHGRP
