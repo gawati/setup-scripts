@@ -71,9 +71,13 @@ function install {
     message 1 "${RESULT}"
 
     message 1 "Importing Management Client Data into exist instance >${XSTST}<. This can take a while."
-    export COLLECTION='docs/gawati-client-data'
+    export EXIST_DIR='docs/gawati-client-data'
+    export COLLUSER="gwdata"
+    export COLLGROUP="gwdata"
     exist_query EXIST_DO_XMLDB_CREATECOLLECTION
-    RESULT="`${STHOME}/bin/client.sh -ouri=xmldb:exist://localhost:${EXIST_PORT}/exist/xmlrpc -u gwdata -P """${STDATAPWD}""" -d -m /db/docs/gawati-client-data/akn -p """${STIMPORT}/gawati-client-data""" 2>/dev/null | tail -1`"
+    exist_query EXIST_DO_SM_CHOWN
+    exist_query EXIST_DO_SM_CHGRP
+    RESULT="`${STHOME}/bin/client.sh -ouri=xmldb:exist://localhost:${EXIST_PORT}/exist/xmlrpc -u gwdata -P """${STDATAPWD}""" -d -m /db/docs/gawati-client-data -p """${STIMPORT}/gawati-client-data""" 2>/dev/null | tail -1`"
     message 1 "${RESULT}"
     }
   }
