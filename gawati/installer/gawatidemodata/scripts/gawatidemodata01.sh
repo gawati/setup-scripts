@@ -59,8 +59,9 @@ function install {
     setvar adminPasswd "${EXIST_PWD}" "${XSTST}"
 
     STDATAPWD="`${STHOME}/bin/client.sh -ouri=xmldb:exist://localhost:${EXIST_PORT}/exist/xmlrpc -u admin -P """${EXIST_PWD}""" -x """data(doc('/db/apps/gw-data/_auth/_pw.xml')/users/user[@name = 'gwdata']/@pw)""" 2>/dev/null | tail -1`"
+    EDITORPWD="`${STHOME}/bin/client.sh -ouri=xmldb:exist://localhost:${EXIST_PORT}/exist/xmlrpc -u admin -P """${EXIST_PWD}""" -x """data(doc('/db/apps/gw-data/_auth/_pw.xml')/users/user[@name = 'gawati-client-data']/@pw)""" 2>/dev/null | tail -1`"
 
-    vardebug XSTST STIMPORT STUSER STHOME EXIST_PORT EXIST_PWD STDATAPWD
+    vardebug XSTST STIMPORT STUSER STHOME EXIST_PORT EXIST_PWD STDATAPWD EDITORPWD
 
     message 1 "Importing Data into exist instance >${XSTST}<. This can take a while."
     RESULT="`${STHOME}/bin/client.sh -ouri=xmldb:exist://localhost:${EXIST_PORT}/exist/xmlrpc -u gwdata -P """${STDATAPWD}""" -d -m /db/apps/gw-data/akn -p """${STIMPORT}/akn""" 2>/dev/null | tail -1`"
@@ -70,15 +71,22 @@ function install {
     RESULT="`${STHOME}/bin/client.sh -ouri=xmldb:exist://localhost:${EXIST_PORT}/exist/xmlrpc -u gwdata -P """${STDATAPWD}""" -d -m /db/apps/gw-data/akn_ft -p """${STIMPORT}/akn_ft""" 2>/dev/null | tail -1`"
     message 1 "${RESULT}"
 
-    message 1 "Importing Management Client Data into exist instance >${XSTST}<. This can take a while."
+
+    message 1 "Add data for management client into exist instance >${XSTST}<."
     export EXIST_DIR='docs/gawati-client-data'
     export COLLUSER="gawati-client-data"
     export COLLGROUP="gawati-client-data"
+
+    message 1 "Creating collection >${EXIST_DIR}<."
     exist_query EXIST_DO_XMLDB_CREATECOLLECTION
+
+    message 1 "Importing data. This can take a while."
+    RESULT="`${STHOME}/bin/client.sh -ouri=xmldb:exist://localhost:${EXIST_PORT}/exist/xmlrpc -u admin -P """${EXIST_PWD}""" -d -m """/db/${EXIST_DIR}""" -p """${STIMPORT}/gawati-client-data"""`"
+    message 1 "${RESULT}"
+
+    message 1 "Setting ownership to >${COLLUSER}:${COLLGROUP}<."
     exist_query EXIST_DO_SM_CHOWN
     exist_query EXIST_DO_SM_CHGRP
-    RESULT="`${STHOME}/bin/client.sh -ouri=xmldb:exist://localhost:${EXIST_PORT}/exist/xmlrpc -u gwdata -P """${STDATAPWD}""" -d -m /db/docs/gawati-client-data -p """${STIMPORT}/gawati-client-data""" 2>/dev/null | tail -1`"
-    message 1 "${RESULT}"
     }
   }
 
