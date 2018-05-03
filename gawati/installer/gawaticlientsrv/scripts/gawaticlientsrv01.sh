@@ -43,7 +43,7 @@ function install {
 
     unzip -q "${INSTALLSRC}"
 
-    sed -i'' "s%\(.*serviceEndPoint[^:]*:\).*%\1 \"${EXIST_URL}/restxq\"%g" configs/dataServer.json
+    sed -i'' "s%\(.*serviceEndPoint[^:]*:\).*%\1 \"${EXIST_URL}/restxq\",%g" configs/dataServer.json
 EndOfScriptAsRUNAS_USER
 
   echo "${OPTIONS}" | grep -i daemon >/dev/null && {
