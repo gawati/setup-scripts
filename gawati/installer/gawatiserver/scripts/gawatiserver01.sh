@@ -41,9 +41,9 @@ EndOfScriptAsRUNAS_USER
     cfgwrite "${CFGSRC}/gawaticron.service" "/etc/systemd/system" "${RUNAS_USER}_cron.service"
     systemctl daemon-reload
     systemctl enable ${RUNAS_USER}_server
-    systemctl start ${RUNAS_USER}_server
+    systemctl restart ${RUNAS_USER}_server
     systemctl enable ${RUNAS_USER}_cron
-    systemctl start ${RUNAS_USER}_cron
+    systemctl restart ${RUNAS_USER}_cron
     }
   }
 

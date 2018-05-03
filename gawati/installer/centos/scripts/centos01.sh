@@ -33,7 +33,7 @@ function install {
   OSinstall haveged 1
 
   systemctl enable haveged
-  systemctl start haveged
+  systemctl restart haveged
 
   SHOSTNAME="`iniget \"${INSTANCE}\" hostname`"
   DNSdomain="`iniget \"${INSTANCE}\" DNSdomain`"

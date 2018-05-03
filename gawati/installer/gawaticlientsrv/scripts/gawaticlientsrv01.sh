@@ -50,7 +50,7 @@ EndOfScriptAsRUNAS_USER
     cfgwrite "${CFGSRC}/gawatiserver.service" "/etc/systemd/system" "${RUNAS_USER}_server.service"
     systemctl daemon-reload
     systemctl enable ${RUNAS_USER}_server
-    systemctl start ${RUNAS_USER}_server
+    systemctl restart ${RUNAS_USER}_server
     }
   }
 

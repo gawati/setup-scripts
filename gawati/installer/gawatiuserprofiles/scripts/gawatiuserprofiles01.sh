@@ -43,9 +43,9 @@ EndOfScriptAsRUNAS_USER
     cfgwrite "${CFGSRC}/gawatiuserprofiles.service" "/etc/systemd/system" "${RUNAS_USER}_server.service"
     systemctl daemon-reload
     systemctl enable mongod
-    systemctl start mongod
+    systemctl restart mongod
     systemctl enable ${RUNAS_USER}_server
-    systemctl start ${RUNAS_USER}_server
+    systemctl restart ${RUNAS_USER}_server
     }
   }
 
