@@ -22,13 +22,13 @@ function readconfig {
   }
 
 function install {
-  VERSION_TEMPLATE="`iniget \"${INSTANCE}\" templateVersion`"
-  ZIP_TEMPLATE="gawati-templates-${VERSION_TEMPLATE}.zip"
+  #VERSION_TEMPLATE="`iniget \"${INSTANCE}\" templateVersion`"
+  #ZIP_TEMPLATE="gawati-templates-${VERSION_TEMPLATE}.zip"
   CFGSRC="${INSTALLER_HOME}/01"
   CFGDST="/etc/httpd/conf.d"
-  vardebug ZIP_TEMPLATE CFGSRC CFGDST
+  vardebug CFGSRC CFGDST
 
-  download "${DOWNLOADFOLDER}/${ZIP_TEMPLATE}" "http://dl.gawati.org/${PKGSRC}/${ZIP_TEMPLATE}"
+  #download "${DOWNLOADFOLDER}/${ZIP_TEMPLATE}" "http://dl.gawati.org/${PKGSRC}/${ZIP_TEMPLATE}"
 
   addtohosts "${MainIP}" "${GAWATI_URL_ROOT}"
   addtohosts "${MainIP}" "data.${GAWATI_URL_ROOT}"
@@ -66,12 +66,12 @@ function install {
     chown root:apache "${PORTALWEBFOLDER}"
     }
 
-  GWTEMPLATES="${WWWROOT}/gwtemplates"
-  vardebug GWTEMPLATES
-  [ -e "${GWTEMPLATES}" ] || {
-    mkdir -p "${GWTEMPLATES}"
-    chown root:apache "${GWTEMPLATES}"
-    }
+  #GWTEMPLATES="${WWWROOT}/gwtemplates"
+  #vardebug GWTEMPLATES
+  #[ -e "${GWTEMPLATES}" ] || {
+  #  mkdir -p "${GWTEMPLATES}"
+  #  chown root:apache "${GWTEMPLATES}"
+  #  }
 
   DSTOBJ="/etc/httpd/logs/${GAWATI_URL_ROOT}"
   vardebug DSTOBJ
@@ -86,10 +86,10 @@ function install {
   [ -f "${DOWNLOADFOLDER}/${ZIP_PORTAL}" ] || bail_out "Portal package not available at >${DOWNLOADFOLDER}/${ZIP_PORTAL}<"
   unzip -q "${DOWNLOADFOLDER}/${ZIP_PORTAL}" -d "${PORTALWEBFOLDER}"
 
-  [ -f "${DOWNLOADFOLDER}/${ZIP_TEMPLATE}" ] || bail_out "Template package not available at >${DOWNLOADFOLDER}/${ZIP_TEMPLATE}<"
-  unzip -q "${DOWNLOADFOLDER}/${ZIP_TEMPLATE}" -d "${GWTEMPLATES}"
-  [ -d "${GWTEMPLATES}/themes" ] || bail_out "Failed to deploy themes."
-  chown -R root:apache "${GWTEMPLATES}/themes"
+  #[ -f "${DOWNLOADFOLDER}/${ZIP_TEMPLATE}" ] || bail_out "Template package not available at >${DOWNLOADFOLDER}/${ZIP_TEMPLATE}<"
+  #unzip -q "${DOWNLOADFOLDER}/${ZIP_TEMPLATE}" -d "${GWTEMPLATES}"
+  #[ -d "${GWTEMPLATES}/themes" ] || bail_out "Failed to deploy themes."
+  #chown -R root:apache "${GWTEMPLATES}/themes"
 
   systemctl restart httpd
   setsebool -P httpd_can_network_connect true
