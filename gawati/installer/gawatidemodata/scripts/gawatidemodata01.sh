@@ -58,17 +58,17 @@ function install {
     askifempty EXIST_PWD "Please provide the administrator password for eXist instance >${XSTST}<."
     setvar adminPasswd "${EXIST_PWD}" "${XSTST}"
 
-    STDATAPWD="`${STHOME}/bin/client.sh -ouri=xmldb:exist://localhost:${EXIST_PORT}/exist/xmlrpc -u admin -P """${EXIST_PWD}""" -x """data(doc('/db/apps/gw-data/_auth/_pw.xml')/users/user[@name = 'gwdata']/@pw)""" 2>/dev/null | tail -1`"
-    EDITORPWD="`${STHOME}/bin/client.sh -ouri=xmldb:exist://localhost:${EXIST_PORT}/exist/xmlrpc -u admin -P """${EXIST_PWD}""" -x """data(doc('/db/apps/gw-data/_auth/_pw.xml')/users/user[@name = 'gawati-client-data']/@pw)""" 2>/dev/null | tail -1`"
+    STDATAPWD="`${STHOME}/bin/client.sh -ouri=xmldb:exist://localhost:${EXIST_PORT}/exist/xmlrpc -u admin -P """${EXIST_PWD}""" -x """data(doc('/db/apps/gawati-data/_auth/_pw.xml')/users/user[@name = 'gawatidata']/@pw)""" 2>/dev/null | tail -1`"
+    EDITORPWD="`${STHOME}/bin/client.sh -ouri=xmldb:exist://localhost:${EXIST_PORT}/exist/xmlrpc -u admin -P """${EXIST_PWD}""" -x """data(doc('/db/apps/gawati-client-data/_auth/_pw.xml')/users/user[@name = 'gawati-client-data']/@pw)""" 2>/dev/null | tail -1`"
 
     vardebug XSTST STIMPORT STUSER STHOME EXIST_PORT EXIST_PWD STDATAPWD EDITORPWD
 
     message 1 "Importing Data into exist instance >${XSTST}<. This can take a while."
-    RESULT="`${STHOME}/bin/client.sh -ouri=xmldb:exist://localhost:${EXIST_PORT}/exist/xmlrpc -u gwdata -P """${STDATAPWD}""" -d -m /db/apps/gw-data/akn -p """${STIMPORT}/akn""" 2>/dev/null | tail -1`"
+    RESULT="`${STHOME}/bin/client.sh -ouri=xmldb:exist://localhost:${EXIST_PORT}/exist/xmlrpc -u gawatidata -P """${STDATAPWD}""" -d -m /db/docs/gawati-data/akn -p """${STIMPORT}/akn""" 2>/dev/null | tail -1`"
     message 1 "${RESULT}"
 
     message 1 "Importing Fulltext Search Data into exist instance >${XSTST}<. This can take a while."
-    RESULT="`${STHOME}/bin/client.sh -ouri=xmldb:exist://localhost:${EXIST_PORT}/exist/xmlrpc -u gwdata -P """${STDATAPWD}""" -d -m /db/apps/gw-data/akn_ft -p """${STIMPORT}/akn_ft""" 2>/dev/null | tail -1`"
+    RESULT="`${STHOME}/bin/client.sh -ouri=xmldb:exist://localhost:${EXIST_PORT}/exist/xmlrpc -u gawatidata -P """${STDATAPWD}""" -d -m /db/docs/gawati-data/akn_ft -p """${STIMPORT}/akn_ft""" 2>/dev/null | tail -1`"
     message 1 "${RESULT}"
 
 
