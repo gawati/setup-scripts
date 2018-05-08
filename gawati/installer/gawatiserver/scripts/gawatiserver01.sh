@@ -1,6 +1,6 @@
 function readconfig {
   VERSION="${2}"
-  ZIP_SERVER="portal-server-${VERSION}.zip"
+  ZIP_SERVER="gawati-portal-fe-${VERSION}.tbz"
 
   installer_init "${1}" "${ZIP_SERVER}" "http://dl.gawati.org/${PKGSRC}/${ZIP_SERVER}"
 
@@ -33,7 +33,7 @@ function install {
     mkdir -p "${SERVER_HOME}"
     cd "${SERVER_HOME}"
 
-    unzip -q "${INSTALLSRC}"
+    tar -xjf "${INSTALLSRC}"
 EndOfScriptAsRUNAS_USER
 
   echo "${OPTIONS}" | grep -i daemon >/dev/null && {
