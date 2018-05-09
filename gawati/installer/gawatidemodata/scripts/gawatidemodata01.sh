@@ -81,7 +81,7 @@ function install {
     exist_query EXIST_DO_XMLDB_CREATECOLLECTION
 
     message 1 "Importing data. This can take a while."
-    RESULT="`${STHOME}/bin/client.sh -ouri=xmldb:exist://localhost:${EXIST_PORT}/exist/xmlrpc -u admin -P """${EXIST_PWD}""" -d -m """/db/${EXIST_DIR}""" -p """${STIMPORT}/gawati-client-data"""`"
+    RESULT="`${STHOME}/bin/client.sh -ouri=xmldb:exist://localhost:${EXIST_PORT}/exist/xmlrpc -u ${COLLUSER} -P """${EDITORPWD}""" -d -m """/db/${EXIST_DIR}""" -p """${STIMPORT}/gawati-client-data"""`"
     message 1 "${RESULT}"
 
     message 1 "Setting ownership to >${COLLUSER}:${COLLGROUP}<."
