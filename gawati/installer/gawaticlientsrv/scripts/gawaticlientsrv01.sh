@@ -2,7 +2,7 @@
 
 function readconfig {
   VERSION="${2}"
-  ZIP_SERVER="gawati-client-server-${VERSION}.zip"
+  ZIP_SERVER="gawati-editor-fe-${VERSION}.zip"
 
   installer_init "${1}" "${ZIP_SERVER}" "http://dl.gawati.org/${PKGSRC}/${ZIP_SERVER}"
 

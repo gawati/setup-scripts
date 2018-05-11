@@ -1,6 +1,6 @@
 function readconfig {
   VERSION="${2}"
-  ZIP_CLIENT="gawati-client-${VERSION}.zip"
+  ZIP_CLIENT="gawati-editor-ui-${VERSION}.zip"
 
   installer_init "${1}" "${ZIP_CLIENT}" "http://dl.gawati.org/${PKGSRC}/${ZIP_CLIENT}"
   
