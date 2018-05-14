@@ -88,6 +88,7 @@ function install {
     exist_query EXIST_DO_SM_CHOWN
     exist_query EXIST_DO_SM_CHGRP
 
+    message 1 "Creating index."
     curl "http://admin:${EXIST_PWD}@localhost:${EXIST_PORT}/exist/apps/gawati-data/post-data-load.xql"
     }
   }
