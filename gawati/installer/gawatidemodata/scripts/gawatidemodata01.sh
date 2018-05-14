@@ -87,6 +87,8 @@ function install {
     message 1 "Setting ownership to >${COLLUSER}:${COLLGROUP}<."
     exist_query EXIST_DO_SM_CHOWN
     exist_query EXIST_DO_SM_CHGRP
+
+    curl "http://admin:${EXIST_PWD}@localhost:${EXIST_PORT}/exist/apps/gawati-data/post-data-load.xql"
     }
   }
 
