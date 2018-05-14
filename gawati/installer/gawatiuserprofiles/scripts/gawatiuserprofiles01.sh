@@ -1,6 +1,6 @@
 function readconfig {
   VERSION="${2}"
-  ZIP_SERVER="gawati-user-profiles-${VERSION}.tbz"
+  ZIP_SERVER="gawati-profiles-fe-${VERSION}.tbz"
 
   installer_init "${1}" "${ZIP_SERVER}" "http://dl.gawati.org/${PKGSRC}/${ZIP_SERVER}"
 

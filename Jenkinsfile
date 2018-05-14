@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     triggers {
-        upstream(upstreamProjects: 'gawati/gawati-client-data/dev,gawati/gawati-editor-fe/dev,gawati/gawati-editor-ui/dev,gawati/gawati-data/dev,gawati/gawati-data-xml/dev,gawati/gawati-portal-fe/dev,gawati/gawati-portal-ui/dev,gawati/gawati-templates/dev,gawati/gawati-user-profiles/dev,gawati/gawati-workflow/dev', threshold: hudson.model.Result.SUCCESS)
+        upstream(upstreamProjects: 'gawati/gawati-client-data/dev,gawati/gawati-editor-fe/dev,gawati/gawati-editor-ui/dev,gawati/gawati-data/dev,gawati/gawati-data-xml/dev,gawati/gawati-portal-fe/dev,gawati/gawati-portal-ui/dev,gawati/gawati-templates/dev,gawati/gawati-profiles-fe/dev,gawati/gawati-workflow/dev', threshold: hudson.model.Result.SUCCESS)
     }
 
     options {
