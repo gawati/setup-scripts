@@ -8,7 +8,7 @@ function install {
   PDFZIP="${DOWNLOADFOLDER}/akn_pdf_sample-${VERSION}.zip"
   XMLZIP="${DOWNLOADFOLDER}/akn_xml_sample-${VERSION}.zip"
   FTZIP="${DOWNLOADFOLDER}/akn_xml_ft_sample-${VERSION}.zip"
-  CLZIP="${DOWNLOADFOLDER}/gawati_client_data_sample-${VERSION}.zip"
+  CLZIP="${DOWNLOADFOLDER}/akn_xml_docs_sample-${VERSION}.zip"
   vardebug PDFZIP XMLZIP FTZIP CLZIP
 
   download "${PDFZIP}" "http://dl.gawati.org/demodata/akn_pdf_sample-${VERSION}.zip"
