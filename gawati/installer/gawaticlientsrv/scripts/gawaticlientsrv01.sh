@@ -11,13 +11,13 @@ function readconfig {
   export EXIST="`iniget \"${INSTANCE}\" exist | tr '-' '_'`"
   export KC_REALM="`iniget \"options" kc_realm`"
   export KC_URL="`iniget \"options" kc_authurl`"
-  export KC_SECRET="`iniget \"options" kc_secret`"
+  export KC_SECRET_CLIENT="`iniget \"options" kc_secret`"
 
   VARNAME="${EXIST}_LURL"
   export EXIST_URL="${!VARNAME}"
 
-  vardebug SERVER_HOME SERVER_PORT EXIST KC_REALM KC_URL KC_SECRET VARNAME EXIST_URL
-  setvars SERVER_HOME SERVER_PORT EXIST KC_REALM KC_URL KC_SECRET
+  vardebug SERVER_HOME SERVER_PORT EXIST KC_REALM KC_URL KC_SECRET_CLIENT VARNAME EXIST_URL
+  setvars SERVER_HOME SERVER_PORT EXIST KC_REALM KC_URL KC_SECRET_CLIENT
   }
 
 function install {

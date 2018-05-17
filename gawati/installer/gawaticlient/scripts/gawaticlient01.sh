@@ -10,10 +10,10 @@ function readconfig {
   export EXIST_CL_URL="`iniget \"${INSTANCE}\" EXIST_CL_URL`"
   export KC_REALM="`iniget \"options" kc_realm`"
   export KC_URL="`iniget \"options" kc_authurl`"
-  export KC_SECRET="`iniget \"options" kc_secret`"
+  export KC_SECRET_CLIENT="`iniget \"options" kc_secret_client`"
 
-  vardebug GAWATI_URL_ROOT GAWATI_URL_ROOT_ GAWATI_URL_ROOT_ESC EXIST_CL_URL KC_REALM KC_URL KC_SECRET
-  setvars GAWATI_URL_ROOT GAWATI_URL_ROOT_ GAWATI_URL_ROOT_ESC EXIST_CL_URL KC_REALM KC_URL KC_SECRET
+  vardebug GAWATI_URL_ROOT GAWATI_URL_ROOT_ GAWATI_URL_ROOT_ESC EXIST_CL_URL KC_REALM KC_URL KC_SECRET_CLIENT
+  setvars GAWATI_URL_ROOT GAWATI_URL_ROOT_ GAWATI_URL_ROOT_ESC EXIST_CL_URL KC_REALM KC_URL KC_SECRET_CLIENT
   }
 
 function install {
