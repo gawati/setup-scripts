@@ -11,7 +11,8 @@ function readconfig {
   export EXIST="`iniget \"${INSTANCE}\" exist | tr '-' '_'`"
   export KC_REALM="`iniget \"options" kc_realm`"
   export KC_URL="`iniget \"options" kc_authurl`"
-  export KC_SECRET_CLIENT="`iniget \"options" kc_secret`"
+  export KC_SECRET_CLIENT="`iniget \"options" kc_secret_client`"
+
 
   VARNAME="${EXIST}_LURL"
   export EXIST_URL="${!VARNAME}"
