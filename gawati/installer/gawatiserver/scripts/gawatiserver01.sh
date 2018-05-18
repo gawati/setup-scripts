@@ -9,8 +9,12 @@ function readconfig {
   export SERVER_PORT="`iniget \"${INSTANCE}\" port`"
   export SERVER_APIPORT="`iniget \"${INSTANCE}\" api_port`"
 
-  vardebug SERVER_HOME SERVER_PORT SERVER_APIPORT
-  setvars SERVER_HOME SERVER_PORT SERVER_APIPORT
+  export KC_REALM="`iniget \"options" kc_realm`"
+  export KC_URL="`iniget \"options" kc_authurl`"
+  export KC_SECRET_PORTAL="`iniget \"options" kc_secret_portal`"
+
+  vardebug SERVER_HOME SERVER_PORT SERVER_APIPORT KC_REALM KC_URL KC_SECRET_PORTAL
+  setvars SERVER_HOME SERVER_PORT SERVER_APIPORT KC_REALM KC_URL KC_SECRET_PORTAL
   }
 
 function install {

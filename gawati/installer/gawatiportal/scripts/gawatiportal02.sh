@@ -10,15 +10,12 @@ function readconfig {
   export GAWATI_URL_ROOT_="`echo ${GAWATI_URL_ROOT} | tr . _`"
   export GAWATI_URL_ROOT_ESC="`echo ${GAWATI_URL_ROOT} | sed 's%\.%\\\.%g'`"
   export EXIST_ST="`iniget \"${INSTANCE}\" existst | tr '-' '_'`"
-  export KC_REALM="`iniget \"options" kc_realm`"
-  export KC_URL="`iniget \"options" kc_authurl`"
-  export KC_SECRET_PORTAL="`iniget \"options" kc_secret_portal`"
 
   VARNAME="${EXIST_ST}_EXIST_PORT"
   export EXIST_ST_URL="http://localhost:${VARNAME}/exist"
 
-  vardebug GAWATI_URL_ROOT GAWATI_URL_ROOT_ GAWATI_URL_ROOT_ESC EXIST_ST EXIST_ST_URL KC_REALM KC_URL KC_SECRET_PORTAL
-  setvars GAWATI_URL_ROOT GAWATI_URL_ROOT_ GAWATI_URL_ROOT_ESC EXIST_ST KC_REALM KC_URL KC_SECRET_PORTAL
+  vardebug GAWATI_URL_ROOT GAWATI_URL_ROOT_ GAWATI_URL_ROOT_ESC EXIST_ST EXIST_ST_URL
+  setvars GAWATI_URL_ROOT GAWATI_URL_ROOT_ GAWATI_URL_ROOT_ESC EXIST_ST
   }
 
 function install {
