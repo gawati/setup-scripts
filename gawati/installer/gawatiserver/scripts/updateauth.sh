@@ -1,5 +1,5 @@
 function postinstall {
-  AUTHJS="${SERVER_HOME}/config/auth.json"
+  AUTHJS="${SERVER_HOME}/configs/auth.json"
   vardebug AUTHJS
   [ -f "${AUTHJS}" ] || bail_out "File >${AUTHJS}< missing."
   sed -i'' "s%realm\([ \"]*\): *\"\([^\"]*\)\"%realm\1:\"${KC_REALM}\"%g" "${AUTHJS}"
