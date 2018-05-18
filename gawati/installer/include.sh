@@ -190,11 +190,18 @@ function exist_query {
   vardebug MYPOST MYUSER MYPWD MYPORT
   declare -g RESPONSE
   RESPONSE="`curl -s -H "Content-Type: text/xml" -u "${MYUSER}:${MYPWD}" -w "%{http_code}" -d "${MYPOST}" "http://localhost:${MYPORT}/exist/rest/db"`"
-  vardebug RESPONSE
+  CODE="`echo "${RESPONSE}" | grep '>' | tail -1 | sed 's%.*>\(.*\)%\1%g'`"
+  vardebug RESPONSE CODE
+  [ "${CODE}" != "200" ] && bail_out 1 "Exist query failed."
   }
 
 EXIST_DO_REPO_LIST='repo:list()'
 EXIST_DO_REPO_UNDEPLOY='repo:undeploy("${EXIST_APPNAME}")'
 EXIST_DO_REPO_REMOVE='repo:remove("${EXIST_APPNAME}")'
 EXIST_DO_REPO_INSTALL='repo:install-and-deploy("${EXIST_APPNAME}","${SOURCE_URL}")'
+EXIST_DO_SM_CHOWN='sm:chown(xs:anyURI("/db/${EXIST_DIR}"),"${COLLUSER}")'
+EXIST_DO_SM_CHGRP='sm:chgrp(xs:anyURI("/db/${EXIST_DIR}"),"${COLLGROUP}")'
+EXIST_DO_SM_CHMOD='sm:chmod(xs:anyURI("/db/${EXIST_DIR}"),"${COLLPERMS}")'
+EXIST_DO_XMLDB_CREATECOLLECTION='xmldb:create-collection("/db","${EXIST_DIR}")'
+EXIST_DO_FILE_MKDIRS='file:mkdirs("${EXIST_DIR}")'
 

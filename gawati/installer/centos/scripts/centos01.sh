@@ -30,6 +30,10 @@ function install {
   OSinstall screen 1
   OSinstall net-tools 1
   OSinstall iptables-services 1
+  OSinstall haveged 1
+
+  systemctl enable haveged
+  systemctl restart haveged
 
   SHOSTNAME="`iniget \"${INSTANCE}\" hostname`"
   DNSdomain="`iniget \"${INSTANCE}\" DNSdomain`"

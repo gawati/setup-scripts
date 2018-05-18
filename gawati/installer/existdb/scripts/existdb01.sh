@@ -10,8 +10,11 @@ function readconfig {
 
   EXIST_PORT="`iniget \"${INSTANCE}\" port`"
   EXIST_SPORT="`iniget \"${INSTANCE}\" sslport`"
-  vardebug EXIST_HOME EXIST_DATA EXIST_PORT EXIST_SPORT
-  setvars EXIST_HOME EXIST_DATA EXIST_PORT EXIST_SPORT
+
+  LURL="`iniget \"${INSTANCE}\" LURL`"
+
+  vardebug EXIST_HOME EXIST_DATA EXIST_PORT EXIST_SPORT LURL
+  setvars EXIST_HOME EXIST_DATA EXIST_PORT EXIST_SPORT LURL
   }
 
 

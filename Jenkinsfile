@@ -2,17 +2,12 @@ pipeline {
     agent any
 
     triggers {
-        upstream(upstreamProjects: 'gawati/gawati-data/master,gawati/gawati-data-xml/master,gawati/gawati-portal-server/master,gawati/gawati-portal-ui/master,gawati/gawati-templates/master', threshold: hudson.model.Result.SUCCESS)
+        upstream(upstreamProjects: 'gawati/gawati-client-data/dev,gawati/gawati-editor-fe/dev,gawati/gawati-editor-ui/dev,gawati/gawati-data/dev,gawati/gawati-data-xml/dev,gawati/gawati-portal-fe/dev,gawati/gawati-portal-ui/dev,gawati/gawati-templates/dev,gawati/gawati-profiles-fe/dev,gawati/gawati-workflow/dev', threshold: hudson.model.Result.SUCCESS)
     }
 
     options {
         disableConcurrentBuilds()
     }
-
-//    define {
-//      def COLOR_MAP = ['SUCCESS': 'good', 'FAILURE': 'danger', 'UNSTABLE': 'danger', 'ABORTED': 'danger']
-//      def STATUS_MAP = ['SUCCESS': 'success', 'FAILURE': 'failed', 'UNSTABLE': 'failed', 'ABORTED': 'failed']
-//    }
 
     stages {
         stage('Prerun Diag') {
@@ -45,7 +40,6 @@ pipeline {
 
     post {
         always {
-//            slackSend (color: COLOR_MAP[currentBuild.currentResult], message: "${currentBuild.currentResult}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL}) : updated https://dev.gawati.org")
             slackSend (message: "${currentBuild.currentResult}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL}) : updated https://dev.gawati.org")
         }
         failure {

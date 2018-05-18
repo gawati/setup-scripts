@@ -1,20 +1,14 @@
 function readconfig {
   VERSION="${2}"
-  ZIP_SERVER="gawati-portal-fe-${VERSION}.tbz"
+  ZIP_SERVER="gawati-profiles-fe-${VERSION}.tbz"
 
   installer_init "${1}" "${ZIP_SERVER}" "http://dl.gawati.org/${PKGSRC}/${ZIP_SERVER}"
 
   export SERVER_HOME="${INSTANCE_PATH}/portal"
-
   export SERVER_PORT="`iniget \"${INSTANCE}\" port`"
-  export SERVER_APIPORT="`iniget \"${INSTANCE}\" api_port`"
 
-  export KC_REALM="`iniget \"options" kc_realm`"
-  export KC_URL="`iniget \"options" kc_authurl`"
-  export KC_SECRET_PORTAL="`iniget \"options" kc_secret_portal`"
-
-  vardebug SERVER_HOME SERVER_PORT SERVER_APIPORT KC_REALM KC_URL KC_SECRET_PORTAL
-  setvars SERVER_HOME SERVER_PORT SERVER_APIPORT KC_REALM KC_URL KC_SECRET_PORTAL
+  vardebug SERVER_HOME SERVER_PORT
+  setvars SERVER_HOME SERVER_PORT
   }
 
 function install {
@@ -22,6 +16,9 @@ function install {
     message 2 "Destination >${SERVER_HOME}< for >${INSTANCE}< already existing. Skipping."
     return
     }
+
+  OSinstall mongodb 1
+  OSinstall mongodb-server 1
 
   CFGSRC="${INSTALLER_HOME}/01"
   vardebug CFGSRC
@@ -40,14 +37,15 @@ function install {
     tar -xjf "${INSTALLSRC}"
 EndOfScriptAsRUNAS_USER
 
+  cfgwrite "${CFGSRC}/variables.env" "${SERVER_HOME}" "variables.env"
+
   echo "${OPTIONS}" | grep -i daemon >/dev/null && {
-    cfgwrite "${CFGSRC}/gawatiserver.service" "/etc/systemd/system" "${RUNAS_USER}_server.service"
-    cfgwrite "${CFGSRC}/gawaticron.service" "/etc/systemd/system" "${RUNAS_USER}_cron.service"
+    cfgwrite "${CFGSRC}/gawatiuserprofiles.service" "/etc/systemd/system" "${RUNAS_USER}_server.service"
     systemctl daemon-reload
+    systemctl enable mongod
+    systemctl restart mongod
     systemctl enable ${RUNAS_USER}_server
     systemctl restart ${RUNAS_USER}_server
-    systemctl enable ${RUNAS_USER}_cron
-    systemctl restart ${RUNAS_USER}_cron
     }
   }
 

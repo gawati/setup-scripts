@@ -9,9 +9,13 @@ yes | rm -rf /home/xstbe/apps
 yes | rm -rf /home/xstst/apps
 yes | rm -rf /home/dev01/apps
 yes | rm -rf /var/www/html/my.gawati.local
+yes | rm -rf /var/www/html/media.my.gawati.local
+yes | rm -rf /var/www/html/edit.my.gawati.local
 yes | rm -rf /root/import/*
 yes | rm -rf /opt/Download/gawati-templates-*
 yes | rm -rf /opt/Download/akn_*_sample-*
 yes | rm -rf /home/gawatiserver/portal
+yes | rm -rf /home/gawaticlientsrv/portal
+yes | rm -rf /home/gawatiprofiles/portal
 yes | rm -f /opt/Download/*-latest.???
 
