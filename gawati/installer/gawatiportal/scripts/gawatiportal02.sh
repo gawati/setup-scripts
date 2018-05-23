@@ -28,7 +28,7 @@ function install {
   addtohosts "${MainIP}" "media.${GAWATI_URL_ROOT}"
 
   cfgwrite "${CFGSRC}/10-gawati.conf" "${CFGDST}" "10-${GAWATI_URL_ROOT}.conf"
-  cfgwrite "${CFGSRC}/10-data.gawati.conf" "${CFGDST}" "10-data.${GAWATI_URL_ROOT}.conf"
+  #cfgwrite "${CFGSRC}/10-data.gawati.conf" "${CFGDST}" "10-data.${GAWATI_URL_ROOT}.conf"
   cfgwrite "${CFGSRC}/10-media.gawati.conf" "${CFGDST}" "10-media.${GAWATI_URL_ROOT}.conf"
 
   WWWROOT="/var/www/html/${GAWATI_URL_ROOT}"
