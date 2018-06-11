@@ -115,7 +115,7 @@ EndOfScriptAsRUNAS_USER
     echo N | tools/yajsw/bin/installDaemon.sh >/dev/null
 
     [ -f "/etc/init.d/${serviceName}" ] && {
-      cat "/etc/init.d/${serviceName}" | sed 's%^\(.*/usr/lib/jvm/jre-1.8.0-openjdk\).*\(/jre/bin/java.*\)$%\1\2%g' > /tmp/initfile
+      cat "/etc/init.d/${serviceName}" | sed 's%^\(.*/usr/lib/jvm/java-1.8.0-openjdk\).*\(/jre/bin/java.*\)$%\1\2%g' > /tmp/initfile
       cat /tmp/initfile > "/etc/init.d/${serviceName}"
       rm /tmp/initfile
       chcon -u system_u "/etc/init.d/${serviceName}"
