@@ -1,0 +1,14 @@
+[bintray-rabbitmq-rpm]
+name=bintray-rabbitmq-rpm
+baseurl=https://dl.bintray.com/rabbitmq/rpm/rabbitmq-server/v3.7.x/el/7/
+gpgcheck=0
+repo_gpgcheck=0
+enabled=1
+
+[bintray-rabbitmq-erlang-rpm]
+name=bintray-rabbitmq-erlang-rpm
+baseurl=https://dl.bintray.com/rabbitmq/rpm/erlang/20/el/7/
+gpgcheck=0
+repo_gpgcheck=0
+enabled=1
+
