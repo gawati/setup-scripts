@@ -6,6 +6,9 @@ function readconfig {
 
   export SERVER_HOME="${INSTANCE_PATH}/portal"
   export SERVER_PORT="`iniget \"${INSTANCE}\" port`"
+  export UI_VERSION="`iniget \"${INSTANCE}\" ui_version`"
+
+  ZIP_UI="gawati-user-profiles-ui-${UI_VERSION}.tbz"
 
   vardebug SERVER_HOME SERVER_PORT
   setvars SERVER_HOME SERVER_PORT
@@ -47,5 +50,14 @@ EndOfScriptAsRUNAS_USER
     systemctl enable ${RUNAS_USER}_server
     systemctl restart ${RUNAS_USER}_server
     }
+
+  UI_DLFILE="${DOWNLOADFOLDER}/${ZIP_UI}"
+  [ -e ${UI_DLFILE} ] || download "${UI_DLFILE}" "http://dl.gawati.org/dev/${ZIP_UI}"
+  [ -e "/var/www/html/${GAWATI_URL_ROOT}/profiles" ] || {
+    mkdir -p "/var/www/html/${GAWATI_URL_ROOT}/profiles"
+    }
+
+  tar -C "/var/www/html/${GAWATI_URL_ROOT}/profiles" -xjf "${UI_DLFILE}"
+  chown -R root:apache "/var/www/html/${GAWATI_URL_ROOT}/profiles"
   }
 
