@@ -1,0 +1,14 @@
+{
+	"gawati-portal-ui":{
+		"urlBase": "https://${GAWATI_URL_ROOT}"
+	},
+	"gawati-portal-fe":{
+		"urlBase": "https://data.${GAWATI_URL_ROOT}/gwp"
+	},
+	"gawati-profiles-ui":{
+		"urlBase": "https://${GAWATI_URL_ROOT}/profiles"
+	},
+	"gawati-profiles-fe":{
+		"urlBase": "https://data.${GAWATI_URL_ROOT}/gwu"
+	}
+}

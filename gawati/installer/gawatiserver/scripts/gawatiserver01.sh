@@ -40,6 +40,9 @@ function install {
     tar -xjf "${INSTALLSRC}"
 EndOfScriptAsRUNAS_USER
 
+  cfgwrite "${CFGSRC}/gawati.json" "${SERVER_HOME}/configs" "gawati.json"
+  chown "${RUNAS_USER}" "${SERVER_HOME}/configs/gawati.json"
+
   echo "${OPTIONS}" | grep -i daemon >/dev/null && {
     cfgwrite "${CFGSRC}/gawatiserver.service" "/etc/systemd/system" "${RUNAS_USER}_server.service"
     cfgwrite "${CFGSRC}/gawaticron.service" "/etc/systemd/system" "${RUNAS_USER}_cron.service"
