@@ -19,12 +19,7 @@
 		},
 		"gawati-media-server": {
 			"urlBase": "https://media.${GAWATI_URL_ROOT}"
-		},
-		"gawati-data-server" : {
-			"urlBase": "https://data.${GAWATI_URL_ROOT}"
 		}
-
 	}
 }
-{
-}
+
